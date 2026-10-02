@@ -1,0 +1,72 @@
+[
+  {
+    "id": "01890010-0000-7000-8000-000000000001",
+    "name": "Greenhouse Window",
+    "kind": "room",
+    "is_outdoor": false,
+    "is_covered": true,
+    "sun_exposure": "part_sun",
+    "site_id": "01890000-0000-7000-8000-000000000001",
+    "parent_id": null
+  },
+  {
+    "id": "01890010-0000-7000-8000-000000000002",
+    "name": "Study",
+    "kind": "room",
+    "is_outdoor": false,
+    "is_covered": true,
+    "sun_exposure": "part_shade",
+    "site_id": "01890000-0000-7000-8000-000000000001",
+    "parent_id": null
+  },
+  {
+    "id": "01890010-0000-7000-8000-000000000003",
+    "name": "Kitchen Sill",
+    "kind": "shelf",
+    "is_outdoor": false,
+    "is_covered": true,
+    "sun_exposure": "full_sun",
+    "site_id": "01890000-0000-7000-8000-000000000001",
+    "parent_id": null
+  },
+  {
+    "id": "01890010-0000-7000-8000-000000000004",
+    "name": "South Border",
+    "kind": "bed",
+    "is_outdoor": true,
+    "is_covered": false,
+    "sun_exposure": "full_sun",
+    "site_id": "01890000-0000-7000-8000-000000000001",
+    "parent_id": null
+  },
+  {
+    "id": "01890010-0000-7000-8000-000000000005",
+    "name": "North Shade Bed",
+    "kind": "bed",
+    "is_outdoor": true,
+    "is_covered": false,
+    "sun_exposure": "full_shade",
+    "site_id": "01890000-0000-7000-8000-000000000001",
+    "parent_id": null
+  },
+  {
+    "id": "01890010-0000-7000-8000-000000000006",
+    "name": "Covered Porch",
+    "kind": "zone",
+    "is_outdoor": true,
+    "is_covered": true,
+    "sun_exposure": "part_shade",
+    "site_id": "01890000-0000-7000-8000-000000000001",
+    "parent_id": null
+  },
+  {
+    "id": "01890010-0000-7000-8000-000000000007",
+    "name": "Back Terrace",
+    "kind": "zone",
+    "is_outdoor": true,
+    "is_covered": false,
+    "sun_exposure": "part_sun",
+    "site_id": "01890000-0000-7000-8000-000000000001",
+    "parent_id": null
+  }
+]

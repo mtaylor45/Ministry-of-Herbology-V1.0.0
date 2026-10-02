@@ -1,0 +1,112 @@
+{
+    "@context": [
+        "https://geojson.org/geojson-ld/geojson-context.jsonld",
+        {
+            "@version": "1.1",
+            "wx": "https://api.weather.gov/ontology#",
+            "s": "https://schema.org/",
+            "geo": "http://www.opengis.net/ont/geosparql#",
+            "unit": "http://codes.wmo.int/common/unit/",
+            "@vocab": "https://api.weather.gov/ontology#",
+            "geometry": {
+                "@id": "s:GeoCoordinates",
+                "@type": "geo:wktLiteral"
+            },
+            "city": "s:addressLocality",
+            "state": "s:addressRegion",
+            "distance": {
+                "@id": "s:Distance",
+                "@type": "s:QuantitativeValue"
+            },
+            "bearing": {
+                "@type": "s:QuantitativeValue"
+            },
+            "value": {
+                "@id": "s:value"
+            },
+            "unitCode": {
+                "@id": "s:unitCode",
+                "@type": "@id"
+            },
+            "forecastOffice": {
+                "@type": "@id"
+            },
+            "forecastGridData": {
+                "@type": "@id"
+            },
+            "publicZone": {
+                "@type": "@id"
+            },
+            "county": {
+                "@type": "@id"
+            }
+        }
+    ],
+    "id": "https://api.weather.gov/points/39.7684,-86.1581",
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [
+            -86.1581,
+            39.7684
+        ]
+    },
+    "properties": {
+        "@id": "https://api.weather.gov/points/39.7684,-86.1581",
+        "@type": "wx:Point",
+        "cwa": "IND",
+        "type": "land",
+        "forecastOffice": "https://api.weather.gov/offices/IND",
+        "gridId": "IND",
+        "gridX": 58,
+        "gridY": 69,
+        "forecast": "https://api.weather.gov/gridpoints/IND/58,69/forecast",
+        "forecastHourly": "https://api.weather.gov/gridpoints/IND/58,69/forecast/hourly",
+        "forecastGridData": "https://api.weather.gov/gridpoints/IND/58,69",
+        "observationStations": "https://api.weather.gov/gridpoints/IND/58,69/stations",
+        "relativeLocation": {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -86.1459355,
+                    39.7766644
+                ]
+            },
+            "properties": {
+                "city": "Indianapolis city (balance)",
+                "state": "IN",
+                "distance": {
+                    "unitCode": "wmoUnit:m",
+                    "value": 0
+                },
+                "bearing": {
+                    "unitCode": "wmoUnit:degree_(angle)",
+                    "value": 0
+                }
+            }
+        },
+        "forecastZone": "https://api.weather.gov/zones/forecast/INZ047",
+        "county": "https://api.weather.gov/zones/county/INC097",
+        "fireWeatherZone": "https://api.weather.gov/zones/fire/INZ047",
+        "timeZone": "America/Indiana/Indianapolis",
+        "radarStation": "KIND",
+        "astronomicalData": {
+            "sunrise": "2026-09-22T07:32:29-04:00",
+            "sunset": "2026-09-22T19:42:01-04:00",
+            "transit": "2026-09-22T13:37:15-04:00",
+            "civilTwilightBegin": "2026-09-22T07:05:38-04:00",
+            "civilTwilightEnd": "2026-09-22T20:08:52-04:00",
+            "nauticalTwilightBegin": "2026-09-22T06:34:07-04:00",
+            "nauticalTwilightEnd": "2026-09-22T20:40:23-04:00",
+            "astronomicalTwilightBegin": "2026-09-22T06:02:03-04:00",
+            "astronomicalTwilightEnd": "2026-09-22T21:12:27-04:00"
+        },
+        "nwr": {
+            "transmitter": "KEC74",
+            "sameCode": "018097",
+            "areaBroadcast": "https://api.weather.gov/radio/KEC74/broadcast",
+            "pointBroadcast": "https://api.weather.gov/points/39.7684,-86.1581/radio"
+        }
+    }
+}

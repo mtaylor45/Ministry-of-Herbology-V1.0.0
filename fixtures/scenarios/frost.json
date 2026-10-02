@@ -1,0 +1,136 @@
+{
+  "name": "frost",
+  "site_id": "01890000-0000-7000-8000-000000000001",
+  "start": "2026-10-20",
+  "days": [
+    {
+      "date": "2026-10-20",
+      "tmin_c": 14.0,
+      "tmax_c": 20.0,
+      "precip_mm": 0.0,
+      "et0_mm": 2.1,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-10-21",
+      "tmin_c": 12.0,
+      "tmax_c": 18.0,
+      "precip_mm": 0.0,
+      "et0_mm": 1.9,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-10-22",
+      "tmin_c": 4.0,
+      "tmax_c": 13.0,
+      "precip_mm": 0.0,
+      "et0_mm": 1.3,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-10-23",
+      "tmin_c": -2.0,
+      "tmax_c": 9.0,
+      "precip_mm": 0.0,
+      "et0_mm": 0.9,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-10-24",
+      "tmin_c": -1.0,
+      "tmax_c": 10.0,
+      "precip_mm": 0.0,
+      "et0_mm": 1.0,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-10-25",
+      "tmin_c": 6.0,
+      "tmax_c": 15.0,
+      "precip_mm": 0.0,
+      "et0_mm": 1.4,
+      "condition": "cloudy"
+    },
+    {
+      "date": "2026-10-26",
+      "tmin_c": 9.0,
+      "tmax_c": 17.0,
+      "precip_mm": 0.0,
+      "et0_mm": 1.6,
+      "condition": "cloudy"
+    },
+    {
+      "date": "2026-10-27",
+      "tmin_c": 10.0,
+      "tmax_c": 18.0,
+      "precip_mm": 0.0,
+      "et0_mm": 1.7,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-10-28",
+      "tmin_c": 11.0,
+      "tmax_c": 19.0,
+      "precip_mm": 0.0,
+      "et0_mm": 1.8,
+      "condition": "clear"
+    }
+  ],
+  "advisories": [
+    {
+      "external_id": "NWS-2026-1023-FROST",
+      "event": "Freeze Warning",
+      "severity": "Moderate",
+      "onset": "2026-10-23T02:00:00Z",
+      "expires": "2026-10-24T13:00:00Z",
+      "headline": "Freeze Warning in effect from 2 AM to 9 AM"
+    }
+  ],
+  "expect": {
+    "description": "Nights cool over three days to -2 C, with an NWS Freeze Warning. Tender outdoor containers get bring_indoors, tender in-ground plants get cover, hardy plants get nothing at all. Three mild nights after the last frost raise a return_outdoors suggestion.",
+    "assertions": [
+      {
+        "specimen": "01890040-0000-7000-8000-000000000010",
+        "night_of": "2026-10-22",
+        "alert": true,
+        "action": "bring_indoors",
+        "note": "basil gives up at 10 C, so it is warned two nights early"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000004",
+        "night_of": "2026-10-23",
+        "alert": true,
+        "action": "bring_indoors",
+        "note": "lemon holds to 2 C; 3 F of margin puts its threshold at 3.7 C"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000006",
+        "alert": false,
+        "note": "lavender is hardy to -20 C"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000007",
+        "alert": false,
+        "note": "rose hardy to -29 C"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000001",
+        "alert": false,
+        "note": "indoor plants are never frost-alerted"
+      },
+      {
+        "task_due_by": "sunset before the cold night"
+      },
+      {
+        "completion_prompts_for": "new indoor location_id"
+      },
+      {
+        "return_outdoors_suggested_after_days": 3,
+        "from_day": "2026-10-27"
+      },
+      {
+        "calendar_behaviour": "frost tasks are timed events with a reminder, not all-day"
+      }
+    ]
+  }
+}

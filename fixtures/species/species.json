@@ -1,0 +1,491 @@
+[
+  {
+    "id": "01890030-0000-7000-8000-000000000001",
+    "accepted_name": "Monstera deliciosa",
+    "family": "Araceae",
+    "genus": "Monstera",
+    "common_names": [
+      "Swiss cheese plant",
+      "ceriman"
+    ],
+    "native_range": [
+      "Mexico",
+      "Central America"
+    ],
+    "light_label": "bright_indirect",
+    "water_k_c": 0.6,
+    "water_interval_days": 9,
+    "soil_ph_min": 5.5,
+    "soil_ph_max": 7.0,
+    "soil_type": "Free-draining aroid mix",
+    "fertilizer_note": "Balanced feed monthly in growth; none in winter.",
+    "humidity_min_pct": 50,
+    "min_temp_c": 10.0,
+    "max_temp_c": 32.0,
+    "usda_zone_min": "10b",
+    "usda_zone_max": "12",
+    "dormancy_months": [
+      12,
+      1,
+      2
+    ],
+    "toxic_to_pets": true,
+    "toxic_to_children": true,
+    "toxicity_note": "Calcium oxalate crystals; chewing causes oral irritation.",
+    "summary": "A robust climbing aroid from Central American rainforest, grown indoors for its fenestrated leaves.",
+    "care_values": [
+      {
+        "field": "min_temp_c",
+        "value": 10.0,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "high",
+        "unit": "C"
+      },
+      {
+        "field": "water_k_c",
+        "value": 0.6,
+        "source_id": "01890020-0000-7000-8000-000000000006",
+        "confidence": "medium"
+      },
+      {
+        "field": "water_interval_days",
+        "value": 9,
+        "source_id": "01890020-0000-7000-8000-000000000006",
+        "confidence": "medium",
+        "unit": "days"
+      },
+      {
+        "field": "light_label",
+        "value": "bright_indirect",
+        "source_id": "01890020-0000-7000-8000-000000000003",
+        "confidence": "medium"
+      },
+      {
+        "field": "toxic_to_pets",
+        "value": true,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "high"
+      },
+      {
+        "field": "soil_ph_min",
+        "value": 5.5,
+        "source_id": "01890020-0000-7000-8000-000000000006",
+        "confidence": "low"
+      }
+    ],
+    "enrichment_state": "complete"
+  },
+  {
+    "id": "01890030-0000-7000-8000-000000000002",
+    "accepted_name": "Lavandula angustifolia",
+    "family": "Lamiaceae",
+    "genus": "Lavandula",
+    "common_names": [
+      "English lavender"
+    ],
+    "native_range": [
+      "Mediterranean"
+    ],
+    "light_label": "full_sun",
+    "water_k_c": 0.45,
+    "water_interval_days": 14,
+    "soil_ph_min": 6.5,
+    "soil_ph_max": 8.0,
+    "soil_type": "Sharp-drained, gritty, lean",
+    "fertilizer_note": "None. Feeding reduces oil and flowering.",
+    "humidity_min_pct": null,
+    "min_temp_c": -20.0,
+    "max_temp_c": 38.0,
+    "usda_zone_min": "5",
+    "usda_zone_max": "9",
+    "dormancy_months": [
+      11,
+      12,
+      1,
+      2
+    ],
+    "toxic_to_pets": false,
+    "toxic_to_children": false,
+    "toxicity_note": null,
+    "summary": "A hardy Mediterranean subshrub wanting full sun, poor soil and sharp drainage.",
+    "care_values": [
+      {
+        "field": "min_temp_c",
+        "value": -20.0,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "high",
+        "unit": "C"
+      },
+      {
+        "field": "water_k_c",
+        "value": 0.45,
+        "source_id": "01890020-0000-7000-8000-000000000006",
+        "confidence": "medium"
+      },
+      {
+        "field": "light_label",
+        "value": "full_sun",
+        "source_id": "01890021-0000-7000-8000-000000000010",
+        "confidence": "high"
+      },
+      {
+        "field": "soil_ph_max",
+        "value": 8.0,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "medium"
+      }
+    ],
+    "enrichment_state": "complete"
+  },
+  {
+    "id": "01890030-0000-7000-8000-000000000003",
+    "accepted_name": "Citrus \u00d7 limon",
+    "family": "Rutaceae",
+    "genus": "Citrus",
+    "common_names": [
+      "lemon"
+    ],
+    "native_range": [
+      "Asia (cultigen)"
+    ],
+    "light_label": "full_sun",
+    "water_k_c": 0.9,
+    "water_interval_days": 5,
+    "soil_ph_min": 5.5,
+    "soil_ph_max": 6.5,
+    "soil_type": "Loam, free-draining",
+    "fertilizer_note": "High-nitrogen citrus feed fortnightly in growth, monthly in winter.",
+    "humidity_min_pct": 40,
+    "min_temp_c": 2.0,
+    "max_temp_c": 38.0,
+    "usda_zone_min": "9",
+    "usda_zone_max": "11",
+    "dormancy_months": [
+      12,
+      1
+    ],
+    "toxic_to_pets": true,
+    "toxic_to_children": false,
+    "toxicity_note": "Citrus oils irritate cats and dogs.",
+    "summary": "A tender evergreen citrus, container-grown in cold climates and brought under cover before frost.",
+    "care_values": [
+      {
+        "field": "min_temp_c",
+        "value": 2.0,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "high",
+        "unit": "C"
+      },
+      {
+        "field": "water_k_c",
+        "value": 0.9,
+        "source_id": "01890020-0000-7000-8000-000000000006",
+        "confidence": "medium"
+      },
+      {
+        "field": "light_label",
+        "value": "full_sun",
+        "source_id": "01890021-0000-7000-8000-000000000011",
+        "confidence": "high"
+      },
+      {
+        "field": "toxic_to_pets",
+        "value": true,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "medium"
+      }
+    ],
+    "enrichment_state": "complete"
+  },
+  {
+    "id": "01890030-0000-7000-8000-000000000004",
+    "accepted_name": "Hosta sieboldiana",
+    "family": "Asparagaceae",
+    "genus": "Hosta",
+    "common_names": [
+      "Siebold's plantain lily"
+    ],
+    "native_range": [
+      "Japan"
+    ],
+    "light_label": "part_shade",
+    "water_k_c": 0.8,
+    "water_interval_days": 4,
+    "soil_ph_min": 6.0,
+    "soil_ph_max": 7.5,
+    "soil_type": "Moisture-retentive humus",
+    "fertilizer_note": "Balanced feed once in spring.",
+    "humidity_min_pct": null,
+    "min_temp_c": -34.0,
+    "max_temp_c": 30.0,
+    "usda_zone_min": "3",
+    "usda_zone_max": "9",
+    "dormancy_months": [
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "toxic_to_pets": true,
+    "toxic_to_children": false,
+    "toxicity_note": "Saponins; vomiting in dogs and cats.",
+    "summary": "A shade perennial for damp ground, dying back completely in winter.",
+    "care_values": [
+      {
+        "field": "min_temp_c",
+        "value": -34.0,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "high",
+        "unit": "C"
+      },
+      {
+        "field": "water_k_c",
+        "value": 0.8,
+        "source_id": "01890020-0000-7000-8000-000000000006",
+        "confidence": "medium"
+      },
+      {
+        "field": "light_label",
+        "value": "part_shade",
+        "source_id": "01890021-0000-7000-8000-000000000012",
+        "confidence": "high"
+      }
+    ],
+    "enrichment_state": "complete"
+  },
+  {
+    "id": "01890030-0000-7000-8000-000000000005",
+    "accepted_name": "Ocimum basilicum",
+    "family": "Lamiaceae",
+    "genus": "Ocimum",
+    "common_names": [
+      "sweet basil"
+    ],
+    "native_range": [
+      "Tropical Asia",
+      "Africa"
+    ],
+    "light_label": "full_sun",
+    "water_k_c": 1.0,
+    "water_interval_days": 2,
+    "soil_ph_min": 6.0,
+    "soil_ph_max": 7.5,
+    "soil_type": "Rich, moist, free-draining",
+    "fertilizer_note": "Weak balanced feed fortnightly.",
+    "humidity_min_pct": 40,
+    "min_temp_c": 10.0,
+    "max_temp_c": 35.0,
+    "usda_zone_min": "10",
+    "usda_zone_max": "11",
+    "dormancy_months": [],
+    "toxic_to_pets": false,
+    "toxic_to_children": false,
+    "toxicity_note": null,
+    "summary": "A tender annual herb that collapses at the first cold night.",
+    "care_values": [
+      {
+        "field": "min_temp_c",
+        "value": 10.0,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "high",
+        "unit": "C"
+      },
+      {
+        "field": "water_k_c",
+        "value": 1.0,
+        "source_id": "01890020-0000-7000-8000-000000000006",
+        "confidence": "high"
+      },
+      {
+        "field": "light_label",
+        "value": "full_sun",
+        "source_id": "01890021-0000-7000-8000-000000000013",
+        "confidence": "high"
+      }
+    ],
+    "enrichment_state": "complete"
+  },
+  {
+    "id": "01890030-0000-7000-8000-000000000006",
+    "accepted_name": "Sansevieria trifasciata",
+    "family": "Asparagaceae",
+    "genus": "Dracaena",
+    "common_names": [
+      "snake plant",
+      "mother-in-law's tongue"
+    ],
+    "native_range": [
+      "West Africa"
+    ],
+    "light_label": "low_light",
+    "water_k_c": 0.25,
+    "water_interval_days": 21,
+    "soil_ph_min": 5.5,
+    "soil_ph_max": 7.5,
+    "soil_type": "Cactus mix",
+    "fertilizer_note": "Dilute feed twice a year.",
+    "humidity_min_pct": null,
+    "min_temp_c": 10.0,
+    "max_temp_c": 35.0,
+    "usda_zone_min": "9",
+    "usda_zone_max": "11",
+    "dormancy_months": [
+      11,
+      12,
+      1,
+      2
+    ],
+    "toxic_to_pets": true,
+    "toxic_to_children": true,
+    "toxicity_note": "Saponins; nausea if chewed.",
+    "summary": "A near-indestructible succulent tolerating low light and long droughts.",
+    "care_values": [
+      {
+        "field": "water_interval_days",
+        "value": 21,
+        "source_id": "01890020-0000-7000-8000-000000000006",
+        "confidence": "medium",
+        "unit": "days"
+      },
+      {
+        "field": "min_temp_c",
+        "value": 10.0,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "medium",
+        "unit": "C"
+      },
+      {
+        "field": "toxic_to_pets",
+        "value": true,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "high"
+      },
+      {
+        "field": "water_k_c",
+        "value": 0.25,
+        "source_id": null,
+        "confidence": "unknown"
+      }
+    ],
+    "enrichment_state": "complete"
+  },
+  {
+    "id": "01890030-0000-7000-8000-000000000007",
+    "accepted_name": "Rosa gallica",
+    "family": "Rosaceae",
+    "genus": "Rosa",
+    "common_names": [
+      "apothecary's rose"
+    ],
+    "native_range": [
+      "Southern Europe",
+      "Western Asia"
+    ],
+    "light_label": "full_sun",
+    "water_k_c": 0.85,
+    "water_interval_days": 7,
+    "soil_ph_min": 6.0,
+    "soil_ph_max": 7.0,
+    "soil_type": "Heavy loam, enriched",
+    "fertilizer_note": "Rose feed in spring and after the first flush.",
+    "humidity_min_pct": null,
+    "min_temp_c": -29.0,
+    "max_temp_c": 35.0,
+    "usda_zone_min": "4",
+    "usda_zone_max": "8",
+    "dormancy_months": [
+      11,
+      12,
+      1,
+      2
+    ],
+    "toxic_to_pets": false,
+    "toxic_to_children": false,
+    "toxicity_note": null,
+    "summary": "An ancient hardy shrub rose, once grown for medicine as much as scent.",
+    "care_values": [
+      {
+        "field": "min_temp_c",
+        "value": -29.0,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "high",
+        "unit": "C"
+      },
+      {
+        "field": "water_k_c",
+        "value": 0.85,
+        "source_id": "01890020-0000-7000-8000-000000000006",
+        "confidence": "medium"
+      },
+      {
+        "field": "light_label",
+        "value": "full_sun",
+        "source_id": "01890021-0000-7000-8000-000000000014",
+        "confidence": "high"
+      }
+    ],
+    "enrichment_state": "complete"
+  },
+  {
+    "id": "01890030-0000-7000-8000-000000000008",
+    "accepted_name": "Mandragora officinarum",
+    "family": "Solanaceae",
+    "genus": "Mandragora",
+    "common_names": [
+      "mandrake"
+    ],
+    "native_range": [
+      "Mediterranean"
+    ],
+    "light_label": null,
+    "water_k_c": 0.5,
+    "water_interval_days": 12,
+    "soil_ph_min": 6.0,
+    "soil_ph_max": 7.5,
+    "soil_type": "Deep, stony, free-draining",
+    "fertilizer_note": "None needed in decent soil.",
+    "humidity_min_pct": null,
+    "min_temp_c": -10.0,
+    "max_temp_c": 32.0,
+    "usda_zone_min": "6",
+    "usda_zone_max": "9",
+    "dormancy_months": [
+      6,
+      7,
+      8
+    ],
+    "toxic_to_pets": true,
+    "toxic_to_children": true,
+    "toxicity_note": "Tropane alkaloids throughout; seriously poisonous. Handle with gloves.",
+    "summary": "A summer-dormant Mediterranean perennial with a famously forked root and a genuinely dangerous alkaloid load.",
+    "care_values": [
+      {
+        "field": "min_temp_c",
+        "value": -10.0,
+        "source_id": "01890020-0000-7000-8000-000000000004",
+        "confidence": "medium",
+        "unit": "C"
+      },
+      {
+        "field": "toxic_to_children",
+        "value": true,
+        "source_id": "01890021-0000-7000-8000-000000000015",
+        "confidence": "high"
+      },
+      {
+        "field": "water_k_c",
+        "value": 0.5,
+        "source_id": null,
+        "confidence": "unknown"
+      },
+      {
+        "field": "light_label",
+        "value": "part_sun",
+        "source_id": "01890021-0000-7000-8000-000000000015",
+        "confidence": "low"
+      }
+    ],
+    "enrichment_state": "complete"
+  }
+]

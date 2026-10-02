@@ -1,0 +1,389 @@
+{
+    "@context": [
+        "https://geojson.org/geojson-ld/geojson-context.jsonld",
+        {
+            "@version": "1.1",
+            "wx": "https://api.weather.gov/ontology#",
+            "@vocab": "https://api.weather.gov/ontology#"
+        }
+    ],
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.742c763feaf4beec39501bd43e210fd1f227709f.001.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.742c763feaf4beec39501bd43e210fd1f227709f.001.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.742c763feaf4beec39501bd43e210fd1f227709f.001.1",
+                "areaDesc": "Southern Oxford; Southern Franklin; Southern Somerset; Interior Waldo; Coastal Waldo; Interior Cumberland Highlands; Northern Grafton; Northern Carroll; Southern Grafton; Southern Carroll",
+                "geocode": {
+                    "SAME": [
+                        "023017",
+                        "023007",
+                        "023025",
+                        "023027",
+                        "023005",
+                        "033009",
+                        "033003"
+                    ],
+                    "UGC": [
+                        "MEZ012",
+                        "MEZ013",
+                        "MEZ014",
+                        "MEZ022",
+                        "MEZ028",
+                        "MEZ033",
+                        "NHZ003",
+                        "NHZ004",
+                        "NHZ005",
+                        "NHZ006"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/forecast/MEZ012",
+                    "https://api.weather.gov/zones/forecast/MEZ013",
+                    "https://api.weather.gov/zones/forecast/MEZ014",
+                    "https://api.weather.gov/zones/forecast/MEZ022",
+                    "https://api.weather.gov/zones/forecast/MEZ028",
+                    "https://api.weather.gov/zones/forecast/MEZ033",
+                    "https://api.weather.gov/zones/forecast/NHZ003",
+                    "https://api.weather.gov/zones/forecast/NHZ004",
+                    "https://api.weather.gov/zones/forecast/NHZ005",
+                    "https://api.weather.gov/zones/forecast/NHZ006"
+                ],
+                "references": [],
+                "sent": "2026-09-23T14:16:00-04:00",
+                "effective": "2026-09-23T14:16:00-04:00",
+                "onset": "2026-09-24T00:00:00-04:00",
+                "expires": "2026-09-24T07:00:00-04:00",
+                "ends": "2026-09-24T07:00:00-04:00",
+                "status": "Actual",
+                "messageType": "Alert",
+                "category": "Met",
+                "severity": "Minor",
+                "certainty": "Likely",
+                "urgency": "Expected",
+                "event": "Frost Advisory",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Gray ME",
+                "headline": "Frost Advisory issued September 23 at 2:16PM EDT until September 24 at 7:00AM EDT by NWS Gray ME",
+                "description": "* WHAT...Temperatures as low as 33 will result in frost formation.\n\n* WHERE...In Maine, Coastal Waldo, Interior Waldo, Southern Somerset,\nInterior Cumberland Highlands, Southern Franklin, and Southern\nOxford Counties. In New Hampshire, Northern Carroll, Northern\nGrafton, Southern Carroll, and Southern Grafton Counties.\n\n* WHEN...From midnight tonight to 7 AM EDT Thursday.\n\n* IMPACTS...Frost could harm sensitive outdoor vegetation. Sensitive\noutdoor plants may be killed if left uncovered.",
+                "instruction": "Take steps now to protect tender plants from the cold.",
+                "response": "Prepare",
+                "note": null,
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "NPWGYX"
+                    ],
+                    "WMOidentifier": [
+                        "WWUS71 KGYX 231816"
+                    ],
+                    "NWSheadline": [
+                        "FROST ADVISORY IN EFFECT FROM MIDNIGHT TONIGHT TO 7 AM EDT THURSDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ],
+                    "VTEC": [
+                        "/O.NEW.KGYX.FR.Y.0010.260924T0400Z-260924T1100Z/"
+                    ],
+                    "eventEndingTime": [
+                        "2026-09-24T07:00:00-04:00"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "FRY"
+                    ]
+                }
+            }
+        },
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.0ce35d6b0c00af5efa91dcaae78400e8068898fc.001.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.0ce35d6b0c00af5efa91dcaae78400e8068898fc.001.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.0ce35d6b0c00af5efa91dcaae78400e8068898fc.001.1",
+                "areaDesc": "Northern Washington; Southeast Warren; Southern Washington",
+                "geocode": {
+                    "SAME": [
+                        "036115",
+                        "036113"
+                    ],
+                    "UGC": [
+                        "NYZ043",
+                        "NYZ083",
+                        "NYZ084"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/forecast/NYZ043",
+                    "https://api.weather.gov/zones/forecast/NYZ083",
+                    "https://api.weather.gov/zones/forecast/NYZ084"
+                ],
+                "references": [],
+                "sent": "2026-09-23T13:39:00-04:00",
+                "effective": "2026-09-23T13:39:00-04:00",
+                "onset": "2026-09-24T02:00:00-04:00",
+                "expires": "2026-09-23T21:45:00-04:00",
+                "ends": "2026-09-24T09:00:00-04:00",
+                "status": "Actual",
+                "messageType": "Alert",
+                "category": "Met",
+                "severity": "Minor",
+                "certainty": "Likely",
+                "urgency": "Expected",
+                "event": "Frost Advisory",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Albany NY",
+                "headline": "Frost Advisory issued September 23 at 1:39PM EDT until September 24 at 9:00AM EDT by NWS Albany NY",
+                "description": "* WHAT...Temperatures in the mid 30s will result in frost formation.\n\n* WHERE...Northern Washington, Southeast Warren, and Southern\nWashington Counties.\n\n* WHEN...From 2 AM to 9 AM EDT Thursday.\n\n* IMPACTS...Frost could harm sensitive outdoor vegetation. Sensitive\noutdoor plants may be killed if left uncovered.",
+                "instruction": "Take steps now to protect tender plants from the cold.",
+                "response": "Prepare",
+                "note": null,
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "NPWALY"
+                    ],
+                    "WMOidentifier": [
+                        "WWUS71 KALY 231739"
+                    ],
+                    "NWSheadline": [
+                        "FROST ADVISORY IN EFFECT FROM 2 AM TO 9 AM EDT THURSDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ],
+                    "VTEC": [
+                        "/O.NEW.KALY.FR.Y.0007.260924T0600Z-260924T1300Z/"
+                    ],
+                    "eventEndingTime": [
+                        "2026-09-24T09:00:00-04:00"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "FRY"
+                    ]
+                }
+            }
+        },
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.aacba77217a1904a439be78bd2bb747e5eda6f79.001.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.aacba77217a1904a439be78bd2bb747e5eda6f79.001.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.aacba77217a1904a439be78bd2bb747e5eda6f79.001.1",
+                "areaDesc": "Northern St. Lawrence; Northern Franklin; Eastern Clinton; Eastern Essex; Western Franklin; Western Chittenden; Lamoille; Washington; Western Addison; Orange; Western Rutland; Eastern Franklin; Eastern Chittenden; Eastern Addison; Eastern Rutland; Western Windsor",
+                "geocode": {
+                    "SAME": [
+                        "036089",
+                        "036033",
+                        "036019",
+                        "036031",
+                        "050011",
+                        "050007",
+                        "050015",
+                        "050023",
+                        "050001",
+                        "050017",
+                        "050021",
+                        "050027"
+                    ],
+                    "UGC": [
+                        "NYZ026",
+                        "NYZ027",
+                        "NYZ028",
+                        "NYZ035",
+                        "VTZ002",
+                        "VTZ005",
+                        "VTZ006",
+                        "VTZ008",
+                        "VTZ009",
+                        "VTZ010",
+                        "VTZ011",
+                        "VTZ016",
+                        "VTZ017",
+                        "VTZ018",
+                        "VTZ019",
+                        "VTZ020"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/forecast/NYZ026",
+                    "https://api.weather.gov/zones/forecast/NYZ027",
+                    "https://api.weather.gov/zones/forecast/NYZ028",
+                    "https://api.weather.gov/zones/forecast/NYZ035",
+                    "https://api.weather.gov/zones/forecast/VTZ002",
+                    "https://api.weather.gov/zones/forecast/VTZ005",
+                    "https://api.weather.gov/zones/forecast/VTZ006",
+                    "https://api.weather.gov/zones/forecast/VTZ008",
+                    "https://api.weather.gov/zones/forecast/VTZ009",
+                    "https://api.weather.gov/zones/forecast/VTZ010",
+                    "https://api.weather.gov/zones/forecast/VTZ011",
+                    "https://api.weather.gov/zones/forecast/VTZ016",
+                    "https://api.weather.gov/zones/forecast/VTZ017",
+                    "https://api.weather.gov/zones/forecast/VTZ018",
+                    "https://api.weather.gov/zones/forecast/VTZ019",
+                    "https://api.weather.gov/zones/forecast/VTZ020"
+                ],
+                "references": [],
+                "sent": "2026-09-23T13:35:00-04:00",
+                "effective": "2026-09-23T13:35:00-04:00",
+                "onset": "2026-09-24T02:00:00-04:00",
+                "expires": "2026-09-24T05:00:00-04:00",
+                "ends": "2026-09-24T09:00:00-04:00",
+                "status": "Actual",
+                "messageType": "Alert",
+                "category": "Met",
+                "severity": "Minor",
+                "certainty": "Likely",
+                "urgency": "Expected",
+                "event": "Frost Advisory",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Burlington VT",
+                "headline": "Frost Advisory issued September 23 at 1:35PM EDT until September 24 at 9:00AM EDT by NWS Burlington VT",
+                "description": "* WHAT...Temperatures between 32 and 36 degrees will result in frost\nformation.\n\n* WHERE...The northern St. Lawrence Valley, the Champlain Valley\noutside of Grand Isle County in Vermont, and portions of central\nand southern Vermont.\n\n* WHEN...From 2 AM to 9 AM EDT Thursday.\n\n* IMPACTS...Frost could harm sensitive outdoor vegetation. Sensitive\noutdoor plants may be killed if left uncovered.\n\n* ADDITIONAL DETAILS...Areas near and along Lake Champlain, generally\nwithin 5 miles, will be less likely to see frost.",
+                "instruction": "Take steps now to protect tender plants from the cold.",
+                "response": "Prepare",
+                "note": null,
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "NPWBTV"
+                    ],
+                    "WMOidentifier": [
+                        "WWUS71 KBTV 231735"
+                    ],
+                    "NWSheadline": [
+                        "FROST ADVISORY IN EFFECT FROM 2 AM TO 9 AM EDT THURSDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ],
+                    "VTEC": [
+                        "/O.NEW.KBTV.FR.Y.0010.260924T0600Z-260924T1300Z/"
+                    ],
+                    "eventEndingTime": [
+                        "2026-09-24T09:00:00-04:00"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "FRY"
+                    ]
+                }
+            }
+        },
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.f74e494b8c0573b709390e96b65f9fb845a968ac.001.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.f74e494b8c0573b709390e96b65f9fb845a968ac.001.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.f74e494b8c0573b709390e96b65f9fb845a968ac.001.1",
+                "areaDesc": "Southern Penobscot",
+                "geocode": {
+                    "SAME": [
+                        "023019"
+                    ],
+                    "UGC": [
+                        "MEZ015"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/forecast/MEZ015"
+                ],
+                "references": [],
+                "sent": "2026-09-23T12:59:00-04:00",
+                "effective": "2026-09-23T12:59:00-04:00",
+                "onset": "2026-09-24T00:00:00-04:00",
+                "expires": "2026-09-23T21:00:00-04:00",
+                "ends": "2026-09-24T07:00:00-04:00",
+                "status": "Actual",
+                "messageType": "Alert",
+                "category": "Met",
+                "severity": "Minor",
+                "certainty": "Likely",
+                "urgency": "Expected",
+                "event": "Frost Advisory",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Caribou ME",
+                "headline": "Frost Advisory issued September 23 at 12:59PM EDT until September 24 at 7:00AM EDT by NWS Caribou ME",
+                "description": "* WHAT...Temperatures as low as 36 will result in frost formation.\n\n* WHERE...Southern Penobscot County.\n\n* WHEN...From midnight tonight to 7 AM EDT Thursday.\n\n* IMPACTS...Frost could harm sensitive outdoor vegetation. Sensitive\noutdoor plants may be killed if left uncovered.",
+                "instruction": "Take steps now to protect tender plants from the cold.",
+                "response": "Prepare",
+                "note": null,
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "NPWCAR"
+                    ],
+                    "WMOidentifier": [
+                        "WWUS71 KCAR 231659"
+                    ],
+                    "NWSheadline": [
+                        "FROST ADVISORY IN EFFECT FROM MIDNIGHT TONIGHT TO 7 AM EDT THURSDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ],
+                    "VTEC": [
+                        "/O.NEW.KCAR.FR.Y.0008.260924T0400Z-260924T1100Z/"
+                    ],
+                    "eventEndingTime": [
+                        "2026-09-24T07:00:00-04:00"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "FRY"
+                    ]
+                }
+            }
+        }
+    ],
+    "title": "Current Frost Advisory events",
+    "updated": "2026-09-23T20:07:50+00:00"
+}

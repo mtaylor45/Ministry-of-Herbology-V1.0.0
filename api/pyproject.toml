@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ministry-of-herbology-api"
+version = "1.0.0"
+description = "The Ministry of Herbology API"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "asyncpg>=0.30",
+    "sqlalchemy[asyncio]>=2.0",
+    "httpx>=0.27",
+    "arq>=0.26",
+    "python-multipart>=0.0.12",
+    "icalendar>=6.0",
+    "pyyaml>=6.0",
+    # The MQTT client for the hub's transport (workers/hub/mqtt.py). It
+    # lands with the transport and not before it: installed
+    # with nothing to drive it, the Ministry Office would report MQTT as a
+    # fault on every deployment. Major-bounded because the transport is
+    # written against aiomqtt 2.x's Client signature.
+    "aiomqtt>=2.3,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    # Pinned, not floored. CI installs from this list, so a floor means CI
+    # runs whatever shipped last night: ruff 0.16 changed the default rule set
+    # and a parts of the project on 0.15 lost three CI rounds to findings its own lint
+    # never showed. The same version here, in the workflow's RUFF_VERSION
+    # and in `make lint`, each checked against the others, so they cannot
+    # drift apart again. Black is pinned for the same reason: its stable
+    # style changes once a year and the tree has to agree with CI on the day.
+    # Bump both deliberately, in one change, with the tree reformatted in it.
+    "ruff==0.16.9",
+    "black==26.5.1",
+    # Pinned for the reason ruff is: mypy now gates CI over api/app, workers
+    # and api/inventory, and a floor would let a new release's checks turn
+    # main red overnight. Bump it deliberately, with whatever it finds fixed.
+    "mypy==2.4.0",
+    # Stubs for pyyaml, so `import yaml` type-checks instead of failing as
+    # untyped under strict mode.
+    "types-PyYAML>=6.0",
+    "openapi-spec-validator>=0.7",
+    # The workflow linter. Pinned for the reason ruff is: a GitHub-rejected
+    # ci.yml runs no jobs at all, and this is what fails the PR instead.
+    "actionlint-py==1.7.12.25",
+]
+
+# One package per parts of the project, plus the shared app. Autodiscovery cannot guess
+# a flat layout with this many top-level packages, so they are listed.
+[tool.setuptools]
+packages = ["app", "almanac", "grounds", "inventory", "tending"]
+
+# 88, not 100: CI runs `black --check` from the repository root, where black
+# finds no configuration and uses its own default, and the tree has been
+# formatted at 88. The number matters less than the agreement.
+[tool.black]
+line-length = 88
+
+# Ruff stays at 100 on purpose. Black cannot split a long comment or string
+# literal, so failing the lint on lines black itself will not fix helps nobody.
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+# The pytest configuration lives in the repository-root `pytest.ini`, and only
+# there. It used to be here as well, which made `api/` the rootdir for any
+# invocation confined to it — and because pytest's `confcutdir` follows the
+# rootdir, the repository-root `conftest.py` that puts `workers` on `sys.path`
+# was never loaded. `testpaths = ["tests"]` pointed at `api/tests`, which has
+# never existed. See `pytest.ini` for the CI failure this caused.

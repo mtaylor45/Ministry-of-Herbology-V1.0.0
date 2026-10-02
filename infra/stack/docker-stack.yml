@@ -1,0 +1,568 @@
+# The Ministry of Herbology — production swarm stack. The deployment.
+#
+#   docker stack deploy -c infra/stack/docker-stack.yml moh
+#
+# Nothing in here is to be hand-edited before deploying. Every value an
+# operator must supply is a variable with no usable default, and the ones that
+# do carry a default are choices rather than credentials.
+#
+# Deploying reads variables from the *shell*, not from a .env file — `docker
+# stack deploy` has no --env-file. docs/deploy/README.md gives the two lines
+# that load one, and `make stack-deploy` does it for you.
+#
+# Required, and deploy fails loudly without them:
+#
+#   MOH_REGISTRY where your images live, e.g. registry.example/moh
+#   MOH_IMAGE_TAG the tag to run, e.g. 1.4.0 or a git sha
+#   MOH_PUBLIC_BASE_URL the https:// URL the app is reached on, no trailing /
+#   MOH_NWS_USER_AGENT a contact string; the US weather service refuses
+#                        traffic without one, and Open-Meteo deserves one
+#
+# Their `:?` messages below are terse, and deliberately contain no hyphen.
+# `docker stack deploy` mis-parses a hyphen inside a ${VAR:?message}: it reads
+# it as the `-` default-value operator and silently substitutes the text after
+# it. A hint reading "e.g. registry.example.net/ministry-of-herbology" does not
+# fail — it quietly deploys the image `of-herbology/moh-api`, which is then a
+# baffling "No such image" on every node. `make preflight` carries the useful
+# messages instead, and scripts/tests/test_stack_file.py keeps the hints clean.
+#
+# Secrets are swarm secrets, mounted as files, never environment variables
+#. Each service is handed the path, and infra/docker/entrypoint.sh
+# reads the file in the moment before exec. `docker service inspect` therefore
+# shows /run/secrets/moh_db_password and never a password.
+#
+# The guide lists a `docker secret create` line for each of the six.
+#
+# Three image directories, one mechanism. Uploaded
+# plans and surveys (MOH_GROUNDS_IMAGE_DIR, the maps module), the Journal's plates
+# (MOH_PLATES_IMAGE_DIR, the journal) and household photographs
+# (MOH_PHOTOS_IMAGE_DIR, the inventory API) each live on a named volume, mounted
+# into the API, which serves all three, and into the plates worker, which
+# writes the second. The variables carry the mount point and nothing else: an
+# operator never sets them, and neither has a default in code, so a service
+# that was started without its volume answers 503 naming the variable rather
+# than writing into a container layer the next deploy throws away. Both
+# volumes are part of the backup (docs/deploy/README.md §13): a restore that
+# brings back the database and not the volumes is a map with no layers, a book
+# with no plates and a growth log with no photographs, which is exactly the
+# 404 the contract describes.
+
+# Shared by the API and the four workers. Top-level extension fields rather
+# than an anchor on the API's own block, so the API can carry the two image
+# variables without every worker inheriting a directory it never mounts.
+x-moh-app-env: &app_env
+  # Off. The default in code is on, because every parts of the project builds against
+  # mocks; leaving it on here would serve fixture plants to a real
+  # household and look entirely convincing while doing it.
+  MOH_MOCK_MODE: 'false'
+  MOH_PUBLIC_BASE_URL: ${MOH_PUBLIC_BASE_URL:?MOH_PUBLIC_BASE_URL is not set. See docs/deploy/README.md}
+  # The entrypoint assembles MOH_DATABASE_URL from these plus the password
+  # file, percent-encoding as it goes.
+  MOH_DB_HOST: db
+  MOH_DB_PORT: '5432'
+  MOH_DB_USER: ${MOH_DB_USER:-herbology}
+  MOH_DB_NAME: ${MOH_DB_NAME:-herbology}
+  MOH_DB_PASSWORD_FILE: /run/secrets/moh_db_password
+  MOH_REDIS_URL: redis://redis:6379/0
+  MOH_MQTT_HOST: mosquitto
+  MOH_MQTT_PORT: '1883'
+  MOH_MQTT_USERNAME: ${MOH_MQTT_USERNAME:-herbology}
+  MOH_MQTT_PASSWORD_FILE: /run/secrets/moh_mqtt_password
+  MOH_NWS_USER_AGENT: ${MOH_NWS_USER_AGENT:?MOH_NWS_USER_AGENT is not set. See docs/deploy/README.md}
+  # Optional integrations. Empty is a valid answer and means "not
+  # configured"; the secret still has to exist, because swarm will not
+  # start a service referring to one that does not.
+  MOH_HA_BASE_URL: ${MOH_HA_BASE_URL:-}
+  MOH_HA_TOKEN_FILE: /run/secrets/moh_ha_token
+  MOH_TZ: ${MOH_TZ:-UTC}
+  TZ: ${MOH_TZ:-UTC}
+
+x-moh-app-secrets: &app_secrets
+  - moh_db_password
+  - moh_mqtt_password
+  - moh_ha_token
+
+services:
+
+  # --------------------------------------------------------------------------
+  # Data. None of these three is on a network that can reach the internet.
+  # --------------------------------------------------------------------------
+
+  db:
+    image: timescale/timescaledb:2.17.2-pg16
+    environment:
+      POSTGRES_USER: ${MOH_DB_USER:-herbology}
+      POSTGRES_DB: ${MOH_DB_NAME:-herbology}
+      POSTGRES_PASSWORD_FILE: /run/secrets/moh_db_password
+      # Not docker-entrypoint-initdb.d. That runs only on an empty volume, so
+      # it can create a database and can never upgrade one; scripts/migrate.sh
+      # is the upgrade path and it is also how the schema first arrives.
+      PGDATA: /var/lib/postgresql/data/pgdata
+    secrets:
+      - moh_db_password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - data
+    healthcheck:
+      # Over TCP, not the Unix socket, and that is the whole point. The
+      # Postgres entrypoint runs a temporary server during first-time
+      # initialisation with listen_addresses empty, so a socket check reports
+      # healthy while the database is still being built. Measured: at two
+      # seconds in, the socket answers and 127.0.0.1 correctly does not.
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U "${MOH_DB_USER:-herbology}" -d "${MOH_DB_NAME:-herbology}"']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 90s
+    deploy:
+      # vip (the default) needs the kernel's ip_vs module; dnsrr does not.
+      # Set from .env.deploy, so a later deploy keeps it (guide §15).
+      endpoint_mode: ${MOH_ENDPOINT_MODE:-vip}
+      # One. Postgres does not become two by being asked, and a second replica
+      # sharing the volume is data loss with extra steps.
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: any
+        delay: 10s
+      update_config:
+        order: stop-first
+      resources:
+        limits:
+          cpus: '${MOH_DB_CPU_LIMIT:-2.0}'
+          memory: ${MOH_DB_MEMORY_LIMIT:-2g}
+        reservations:
+          memory: ${MOH_DB_MEMORY_RESERVATION:-512m}
+
+  redis:
+    image: redis:7-alpine
+    command:
+      - redis-server
+      - --appendonly
+      - 'yes'
+      # Arq keeps the job queue here. Evicting a key under memory pressure
+      # would silently drop a watering task, so the policy is to refuse writes
+      # instead and be noisy about it.
+      - --maxmemory
+      - ${MOH_REDIS_MAXMEMORY:-256mb}
+      - --maxmemory-policy
+      - noeviction
+    volumes:
+      - redis-data:/data
+    networks:
+      - data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    deploy:
+      # vip (the default) needs the kernel's ip_vs module; dnsrr does not.
+      # Set from .env.deploy, so a later deploy keeps it (guide §15).
+      endpoint_mode: ${MOH_ENDPOINT_MODE:-vip}
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 10s
+      resources:
+        limits:
+          cpus: '${MOH_REDIS_CPU_LIMIT:-0.5}'
+          memory: ${MOH_REDIS_MEMORY_LIMIT:-384m}
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0.20
+    configs:
+      - source: moh_mosquitto_conf
+        target: /mosquitto/config/mosquitto.conf
+    secrets:
+      - source: moh_mqtt_passwords
+        target: /run/secrets/moh_mqtt_passwords
+        # Mosquitto refuses to read a password file that anyone else can, and
+        # it drops to the `mosquitto` user (uid 1883) before reading it.
+        uid: '1883'
+        gid: '1883'
+        mode: 0400
+    volumes:
+      - mosquitto-data:/mosquitto/data
+    networks:
+      - data
+      - app
+    ports:
+      # Home Assistant lives outside this swarm and has to reach the broker, so
+      # this is the one data service with a published port. Plain MQTT on a
+      # trusted LAN: keep it off the internet. It is tolerable precisely
+      # because of the standing rule that no MQTT payload ever carries a token
+      # or an API key — there is nothing on this port worth
+      # stealing, only readings worth forging, which is what the password file
+      # is for.
+      - target: 1883
+        published: ${MOH_MQTT_PORT:-1883}
+        protocol: tcp
+        mode: host
+    healthcheck:
+      # BusyBox nc, not bash's /dev/tcp. This image is Alpine and its `sh` is
+      # ash, which has no /dev/tcp at all — a healthcheck written that way
+      # never passes, so swarm kills the broker every 90 seconds and the task
+      # history fills with clean exits that look like nothing is wrong.
+      test: ['CMD-SHELL', 'timeout 2 nc -z 127.0.0.1 1883 || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      # vip (the default) needs the kernel's ip_vs module; dnsrr does not.
+      # Set from .env.deploy, so a later deploy keeps it (guide §15).
+      endpoint_mode: ${MOH_ENDPOINT_MODE:-vip}
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: any
+        delay: 10s
+      resources:
+        limits:
+          cpus: '${MOH_MQTT_CPU_LIMIT:-0.5}'
+          memory: ${MOH_MQTT_MEMORY_LIMIT:-128m}
+
+  # --------------------------------------------------------------------------
+  # Application
+  # --------------------------------------------------------------------------
+
+  api:
+    image: ${MOH_REGISTRY:?MOH_REGISTRY is not set. See docs/deploy/README.md}/moh-api:${MOH_IMAGE_TAG:?MOH_IMAGE_TAG is not set. See docs/deploy/README.md}
+    environment:
+      <<: *app_env
+      # This deployment's own API, as the hub's routes served by this process
+      # address it (the Lunette reads the round from it). Set here rather than
+      # left to a default in the hub's code, so the one address the stack
+      # uses for itself is written in the stack, the same as on worker-hub and
+      # web. An internal overlay name, not a host anyone outside resolves.
+      MOH_API_URL: http://api:8000
+      # The mount points of the three image volumes below. The API serves all
+      # three, and writes plans and photographs itself.
+      MOH_GROUNDS_IMAGE_DIR: /srv/images/grounds
+      MOH_PLATES_IMAGE_DIR: /srv/images/plates
+      MOH_PHOTOS_IMAGE_DIR: /srv/images/photos
+    secrets: *app_secrets
+    volumes:
+      # Photographs, uploaded and served by the API. This
+      # replaces the `uploads` volume that held the place for them until the inventory API's
+      # upload landed; nothing ever wrote to that one.
+      - photos-images:/srv/images/photos
+      # Plans and surveys, written and served by the API.
+      - grounds-images:/srv/images/grounds
+      # Plates, written by worker-plates and served here. The
+      # same volume is mounted at the same path in both services.
+      - plates-images:/srv/images/plates
+    networks:
+      - data
+      - app
+    healthcheck:
+      test: ['CMD-SHELL', 'python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen(''http://127.0.0.1:8000/api/v1/healthz'', timeout=3).status==200 else 1)"']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      # vip (the default) needs the kernel's ip_vs module; dnsrr does not.
+      # Set from .env.deploy, so a later deploy keeps it (guide §15).
+      endpoint_mode: ${MOH_ENDPOINT_MODE:-vip}
+      replicas: ${MOH_API_REPLICAS:-2}
+      placement:
+        constraints:
+          # The image volumes are local volumes, and a local volume does
+          # not follow a task to another node. The API serves what
+          # worker-plates writes, so both are pinned where the database and
+          # the broker already are, for the same reason. On a single node
+          # this changes nothing; on several it is what keeps the pictures
+          # and the rows that point at them on the same machine.
+          - node.role == manager
+      restart_policy:
+        condition: any
+        delay: 10s
+      update_config:
+        # One at a time, and put it back if the new one never turns healthy.
+        parallelism: 1
+        delay: 20s
+        order: start-first
+        failure_action: rollback
+        monitor: 60s
+      rollback_config:
+        parallelism: 1
+        order: start-first
+      resources:
+        limits:
+          cpus: '${MOH_API_CPU_LIMIT:-1.0}'
+          memory: ${MOH_API_MEMORY_LIMIT:-768m}
+        reservations:
+          memory: ${MOH_API_MEMORY_RESERVATION:-192m}
+
+  web:
+    image: ${MOH_REGISTRY:?MOH_REGISTRY is not set. See docs/deploy/README.md}/moh-web:${MOH_IMAGE_TAG:?MOH_IMAGE_TAG is not set. See docs/deploy/README.md}
+    environment:
+      NODE_ENV: production
+      # Server-side rendering talks to the API directly over the overlay
+      # network; the browser reaches it through Nginx on the public origin.
+      MOH_API_URL: http://api:8000
+      MOH_PUBLIC_BASE_URL: ${MOH_PUBLIC_BASE_URL:?MOH_PUBLIC_BASE_URL is not set. See docs/deploy/README.md}
+      TZ: ${MOH_TZ:-UTC}
+    networks:
+      - app
+    healthcheck:
+      test: ['CMD-SHELL', 'node -e "fetch(''http://127.0.0.1:3000/'').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      # vip (the default) needs the kernel's ip_vs module; dnsrr does not.
+      # Set from .env.deploy, so a later deploy keeps it (guide §15).
+      endpoint_mode: ${MOH_ENDPOINT_MODE:-vip}
+      replicas: ${MOH_WEB_REPLICAS:-2}
+      restart_policy:
+        condition: any
+        delay: 10s
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
+        failure_action: rollback
+        monitor: 60s
+      rollback_config:
+        parallelism: 1
+        order: start-first
+      resources:
+        limits:
+          cpus: '${MOH_WEB_CPU_LIMIT:-1.0}'
+          memory: ${MOH_WEB_MEMORY_LIMIT:-512m}
+        reservations:
+          memory: ${MOH_WEB_MEMORY_RESERVATION:-128m}
+
+  # --------------------------------------------------------------------------
+  # Background workers. One image, four Arq queues — the module is the only
+  # difference. They are separate services rather than one because they fail
+  # for different reasons: botany depends on other people's APIs, weather on a
+  # forecast provider, hub on a Raspberry Pi in the hall, and plates on nothing
+  # urgent at all. A single service would mean restarting all four to fix one.
+  #
+  # Each is replicas: 1 on purpose. Arq jobs here are not written to be run
+  # twice at once, and two schedulers means two waterings.
+  # --------------------------------------------------------------------------
+
+  worker-weather:
+    image: ${MOH_REGISTRY:?MOH_REGISTRY is not set. See docs/deploy/README.md}/moh-worker:${MOH_IMAGE_TAG:?MOH_IMAGE_TAG is not set. See docs/deploy/README.md}
+    environment:
+      <<: *app_env
+      WORKER_MODULE: workers.weather.tasks
+    secrets: *app_secrets
+    networks:
+      - data
+      - app
+    deploy: &worker_deploy
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 15s
+      update_config:
+        parallelism: 1
+        order: stop-first
+        failure_action: rollback
+        monitor: 60s
+      resources:
+        limits:
+          cpus: '${MOH_WORKER_CPU_LIMIT:-0.75}'
+          memory: ${MOH_WORKER_MEMORY_LIMIT:-512m}
+        reservations:
+          memory: ${MOH_WORKER_MEMORY_RESERVATION:-128m}
+
+  worker-botany:
+    image: ${MOH_REGISTRY:?MOH_REGISTRY is not set. See docs/deploy/README.md}/moh-worker:${MOH_IMAGE_TAG:?MOH_IMAGE_TAG is not set. See docs/deploy/README.md}
+    environment:
+      <<: *app_env
+      WORKER_MODULE: workers.botany.tasks
+    secrets: *app_secrets
+    networks:
+      - data
+      - app
+    deploy: *worker_deploy
+
+  worker-hub:
+    image: ${MOH_REGISTRY:?MOH_REGISTRY is not set. See docs/deploy/README.md}/moh-worker:${MOH_IMAGE_TAG:?MOH_IMAGE_TAG is not set. See docs/deploy/README.md}
+    environment:
+      <<: *app_env
+      WORKER_MODULE: workers.hub.tasks
+      # The notification jobs read this deployment's own API over the overlay
+      # network, with no credential on the call (workers/hub/notify/state.py).
+      # Same address the web service already uses for server-side rendering.
+      MOH_API_URL: http://api:8000
+      # A deployment-wide Home Assistant notify service, for members whose
+      # own notify_prefs name none. Empty means nobody is set up for
+      # notifications yet, which the Ministry Office reports as a setup step.
+      # A service name, not a credential; the token is the moh_ha_token secret.
+      MOH_HA_NOTIFY_SERVICE: ${MOH_HA_NOTIFY_SERVICE:-}
+    secrets: *app_secrets
+    networks:
+      - data
+      - app
+    deploy: *worker_deploy
+
+  worker-plates:
+    image: ${MOH_REGISTRY:?MOH_REGISTRY is not set. See docs/deploy/README.md}/moh-worker:${MOH_IMAGE_TAG:?MOH_IMAGE_TAG is not set. See docs/deploy/README.md}
+    environment:
+      <<: *app_env
+      WORKER_MODULE: workers.plates.tasks
+      # Where the pipeline writes plates: the same volume the API serves them
+      # from, at the same path.
+      MOH_PLATES_IMAGE_DIR: /srv/images/plates
+    secrets: *app_secrets
+    volumes:
+      - plates-images:/srv/images/plates
+    networks:
+      - data
+      - app
+    deploy:
+      <<: *worker_deploy
+      placement:
+        constraints:
+          # With the API, on the node that owns the plates volume (see the
+          # API's placement note).
+          - node.role == manager
+
+  # --------------------------------------------------------------------------
+  # Front door
+  # --------------------------------------------------------------------------
+
+  nginx:
+    image: nginx:1.27-alpine
+    configs:
+      - source: moh_nginx_conf
+        target: /etc/nginx/nginx.conf
+      - source: moh_nginx_proxy_conf
+        target: /etc/nginx/moh-proxy.conf
+    secrets:
+      - source: moh_tls_cert
+        target: /run/secrets/moh_tls_cert
+        mode: 0444
+      - source: moh_tls_key
+        target: /run/secrets/moh_tls_key
+        mode: 0400
+    volumes:
+      # Only used if the operator renews with an HTTP-01 webroot challenge.
+      # Empty and harmless otherwise. Nothing in this repository obtains a
+      # certificate; see docs/deploy/README.md.
+      - acme:/var/www/acme
+    networks:
+      - app
+    ports:
+      # host, not ingress. Through the routing mesh every request arrives from
+      # an internal load-balancer address, so the access log cannot tell a
+      # phone on the sofa from the open internet, and neither could anything
+      # you later put in front of it.
+      - target: 80
+        published: ${MOH_HTTP_PORT:-80}
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: ${MOH_HTTPS_PORT:-443}
+        protocol: tcp
+        mode: host
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1/healthz || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      # global, because host-mode ports bind on the node the task lands on.
+      # One replica plus a host port means only one node answers on :443, and
+      # which node that is can change without warning.
+      mode: global
+      restart_policy:
+        condition: any
+        delay: 10s
+      update_config:
+        # stop-first: two Nginx tasks cannot hold the same host port at once,
+        # so start-first would deadlock the update rather than make it safer.
+        order: stop-first
+        failure_action: rollback
+        monitor: 30s
+      resources:
+        limits:
+          cpus: '${MOH_NGINX_CPU_LIMIT:-0.5}'
+          memory: ${MOH_NGINX_MEMORY_LIMIT:-192m}
+
+networks:
+  # Internal: no route to the internet and no route in. The database, Redis and
+  # the broker sit only here, so a compromised web front end cannot reach the
+  # database directly and the database cannot phone anywhere.
+  data:
+    driver: overlay
+    internal: true
+  # The ordinary overlay: service-to-service for the front door, and outbound
+  # for the API and the workers, which have to reach Open-Meteo, POWO and a
+  # Home Assistant on the LAN.
+  app:
+    driver: overlay
+
+volumes:
+  db-data:
+  redis-data:
+  mosquitto-data:
+  # The three image volumes. Back them up with the database (README §13):
+  # `make backup` archives all three, and a restore without them is a
+  # database whose layers, plates and photographs all 404.
+  grounds-images:
+  plates-images:
+  photos-images:
+  acme:
+
+configs:
+  # Config objects are immutable in swarm, so these carry the content hash of
+  # the file. Edit a config and `make stack-deploy` creates a new object and
+  # points the service at it; without the name changing, swarm would keep
+  # serving the old content and nothing would say so.
+  moh_nginx_conf:
+    file: ./nginx/nginx.conf
+    name: moh_nginx_conf_${MOH_CONFIG_VERSION:-1}
+  moh_nginx_proxy_conf:
+    file: ./nginx/moh-proxy.conf
+    name: moh_nginx_proxy_conf_${MOH_CONFIG_VERSION:-1}
+  moh_mosquitto_conf:
+    file: ./mosquitto/mosquitto.conf
+    name: moh_mosquitto_conf_${MOH_CONFIG_VERSION:-1}
+
+secrets:
+  # external: the operator creates each of these with `docker secret create`
+  # before the first deploy, and this file never sees a value. The guide gives
+  # the exact line for each one, including how to generate it.
+  #
+  # The key is what services refer to, and so the path inside every container:
+  # /run/secrets/<key>. The swarm object behind it is `name`, which defaults
+  # to the key and can be pointed elsewhere from .env.deploy. That is how a
+  # rotation survives the next deploy: a secret cannot be edited, so a new one
+  # goes in under a new name, and the stack says so (guide §12, Rotating a
+  # secret). The rotation was a `docker service update`, which
+  # `docker stack deploy` quietly undid by putting the old name back.
+  moh_db_password:
+    external: true
+    name: ${MOH_DB_PASSWORD_SECRET:-moh_db_password}
+  moh_mqtt_password:
+    external: true
+    name: ${MOH_MQTT_PASSWORD_SECRET:-moh_mqtt_password}
+  moh_mqtt_passwords:
+    external: true
+    name: ${MOH_MQTT_PASSWORDS_SECRET:-moh_mqtt_passwords}
+  moh_ha_token:
+    external: true
+    name: ${MOH_HA_TOKEN_SECRET:-moh_ha_token}
+  moh_tls_cert:
+    external: true
+    name: ${MOH_TLS_CERT_SECRET:-moh_tls_cert}
+  moh_tls_key:
+    external: true
+    name: ${MOH_TLS_KEY_SECRET:-moh_tls_key}

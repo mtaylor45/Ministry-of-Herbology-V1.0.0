@@ -1,0 +1,40 @@
+[
+  {
+    "id": "01890050-0000-7000-8000-000000000001",
+    "name": "Keeper",
+    "role": "keeper",
+    "notify_prefs": {
+      "home_assistant": {
+        "service": "notify.mobile_app_keepers_phone",
+        "rounds": true,
+        "frost": true,
+        "health": true,
+        "rounds_hour": 7,
+        "quiet_hours": [22, 7],
+        "units": "metric"
+      }
+    }
+  },
+  {
+    "id": "01890050-0000-7000-8000-000000000002",
+    "name": "Tender",
+    "role": "tender",
+    "notify_prefs": {
+      "home_assistant": {
+        "service": "notify.mobile_app_tenders_phone",
+        "rounds": false,
+        "frost": true,
+        "health": false,
+        "rounds_hour": 9,
+        "quiet_hours": [21, 8],
+        "units": "imperial"
+      }
+    }
+  },
+  {
+    "id": "01890050-0000-7000-8000-000000000003",
+    "name": "Observer",
+    "role": "observer",
+    "notify_prefs": {}
+  }
+]

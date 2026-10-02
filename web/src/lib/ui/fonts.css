@@ -1,0 +1,29 @@
+/* The one self-hosted face: Cormorant Garamond, the display typeface.
+ *
+ * Served from this app's own origin — never a Google Fonts URL. the design says
+ * nothing may depend on a service the operator did not choose, and a font CDN is
+ * a request to someone else's server on every load and a blank heading in a
+ * garden with no signal. The files and their licence live in
+ * `web/static/fonts/`, with the subsetting command that produced them.
+ *
+ * `font-display: swap` plus the full system serif stack behind it in
+ * `--moh-font-display` means a font that never arrives costs a different shape,
+ * not an invisible heading. `unicode-range` scopes the subset, so a character it
+ * does not carry falls back to the system serif rather than to a box.
+ *
+ * Body text keeps the system-first serif stack: the display face is a few dozen
+ * headings, body text is every screen, and the installed serif is already hinted
+ * for the device and costs nothing.
+ */
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/cormorant-garamond-latin.woff2') format('woff2-variations');
+  /* One variable file covers headings at 600 and themed labels at 400. */
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0100-017F, U+2013-2014, U+2018-201A, U+201C-201E, U+2020-2022, U+2026,
+    U+2039-203A, U+2044, U+2212;
+}

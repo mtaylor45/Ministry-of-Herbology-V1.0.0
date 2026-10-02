@@ -1,0 +1,196 @@
+/* Design tokens — the design system. an earlier release deliverable, extended re-pigmented in
+ * an earlier release onto the Enchanted Academy palette.
+ *
+ * Two themes: `parchment` (light) and `greenhouse` (dark). `parchment` is the
+ * default — a first-time visitor gets it whatever the device prefers, because
+ * Morning Rounds is used outdoors in daylight. There is
+ * deliberately no `prefers-color-scheme` block here; dark is a choice made in
+ * the theme switcher and remembered, and `contrast.test.ts` asserts the block
+ * has not crept back.
+ *
+ * Every colour pair used for text on a surface meets WCAG AA at body size; the
+ * checks live in web/src/lib/ui/contrast.test.ts so a token change cannot
+ * silently break it. If a colour fails there, the colour changes — never the
+ * threshold.
+ *
+ * Display faces are for headings and themed labels. Body text is a readable
+ * serif, `--moh-font-ui` is for metadata and system messages (guide §3).
+ *
+ * The theme selectors are plain attribute selectors rather than `:root[…]` so a
+ * subtree can carry its own theme — that is what lets the component gallery
+ * show both themes side by side on one page.
+ */
+
+@import './fonts.css';
+
+:root,
+[data-theme='parchment'] {
+  /* surfaces — Aged Parchment, Warm Ivory, and a gently darkened well.
+   * The well is only a few percent darker than the page on purpose: the design
+   * derived brass and sage were measured on parchment and ivory, and a deeper
+   * well drops both below 4.5:1. The recess is carried by the brass border and
+   * the paper shadow instead, which is what the guide asks for anyway (§12). */
+  --moh-surface: #e8dcc2;
+  --moh-surface-raised: #f4edda;
+  --moh-surface-sunken: #e4d8c0;
+  --moh-field: #f4edda;
+  --moh-selected: #dfe3d2;
+  --moh-skeleton: #dccfb0;
+  --moh-scrim: rgb(17 23 34 / 0.55);
+  --moh-border: #877241;
+
+  /* ink — Midnight Ink, and a muted ink drawn from the same pigment */
+  --moh-ink: #111722;
+  --moh-ink-muted: #434d5c;
+  --moh-ink-inverse: #f4edda;
+
+  /* The plain half of a paired label. It is muted against a page surface and
+   * takes the control's own ink inside a filled control — a filled control
+   * re-declares this token in its own rule. See Label.svelte, and the guard in
+   * contrast.test.ts: leaving the page's muted ink on a filled green button is
+   * how a 1.26:1 pairing once shipped. */
+  --moh-plain-ink: var(--moh-ink-muted);
+
+  /* the greenhouse greens — Forest Green, the principal institutional colour */
+  --moh-accent: #19382f;
+  --moh-accent-hover: #25523d;
+  --moh-accent-ink: #f4edda;
+
+  /* destructive actions — uprooting, discarding, deleting. Burgundy. */
+  --moh-danger: #5a242d;
+  --moh-danger-hover: #471c23;
+  --moh-danger-ink: #f4edda;
+
+  /* Antique Gold, in three strengths.
+   * Full strength fails AA on every light surface (1.74–2.30), so on light it
+   * is decoration that carries no meaning — never text, never a border or a
+   * focus ring that is the only indicator of anything. The two derived brasses
+   * are what carry meaning: `-line` for rules and rings, `-ink` for gold text. */
+  --moh-gold-line: #877241;
+  --moh-gold-ink: #6e5c36;
+  --moh-gold-decor: #b89a5a;
+
+  /* Muted Sage, adjusted to carry text: botanical categories and diagrams */
+  --moh-sage: #57634e;
+
+  /* status — each has a plain meaning attached in copy, never colour alone */
+  --moh-parched: #73340f; /* needs water */
+  --moh-sated: #1b4f60; /* rain covered it */
+  --moh-frost: #202c45; /* frost alert — Midnight Blue */
+  --moh-thriving: #2e5a38;
+  --moh-ailing: #5a242d;
+
+  /* type — the display face is self-hosted (fonts.css, the design/0019); every
+   * stack keeps a system fallback behind it so a font that never arrives costs
+   * a different shape, not a blank heading. */
+  --moh-font-display:
+    'Cormorant Garamond', 'EB Garamond', 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  --moh-font-body: 'EB Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --moh-font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --moh-font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* metadata gets §3's treatment: small, uppercase, wide tracking */
+  --moh-tracking-meta: 0.08em;
+
+  /* a 1.25 modular scale, 16px base */
+  --moh-text-xs: 0.64rem;
+  --moh-text-sm: 0.8rem;
+  --moh-text-base: 1rem;
+  --moh-text-lg: 1.25rem;
+  --moh-text-xl: 1.5625rem;
+  --moh-text-2xl: 1.953rem;
+  --moh-text-3xl: 2.441rem;
+
+  /* spacing, on a 4px grid */
+  --moh-space-1: 0.25rem;
+  --moh-space-2: 0.5rem;
+  --moh-space-3: 0.75rem;
+  --moh-space-4: 1rem;
+  --moh-space-6: 1.5rem;
+  --moh-space-8: 2rem;
+  --moh-space-12: 3rem;
+
+  /* §13's 2–6px band. Pill shapes are out; the one exception is a real pill
+   * control's track, which is a shape, not a card. */
+  --moh-radius: 4px;
+  --moh-radius-lg: 6px;
+
+  /* §12: large, soft, low-opacity. Paper on a desk, not material elevation. */
+  --moh-shadow: 0 8px 30px rgb(17 23 34 / 0.2);
+  --moh-shadow-floating: 0 16px 45px rgb(17 23 34 / 0.28);
+
+  /* Whimsy at moments only; all of it is disabled under prefers-reduced-motion.
+   * The guide's 400–700ms is for atmospheric motion — page turns, plate
+   * reveals. Interactive feedback stays quick: half a second of ceremony
+   * between tapping "watered" and seeing it is ceremony charged to someone
+   * standing in the rain. The curve is shared by all of it. */
+  --moh-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --moh-motion-quick: 140ms;
+  --moh-motion-sheet: 240ms;
+  --moh-motion-atmospheric: 500ms;
+  --moh-transition-magic: var(--moh-motion-atmospheric) var(--moh-motion-ease);
+
+  /* a touch target never smaller than this; the app is used outdoors, one-handed */
+  --moh-tap: 44px;
+  /* a list row is sized for a thumb, not a cursor */
+  --moh-row: 56px;
+}
+
+[data-theme='greenhouse'] {
+  --moh-surface: #111722;
+  --moh-surface-raised: #19382f;
+  --moh-surface-sunken: #0b0f17;
+  --moh-field: #0b0f17;
+  --moh-selected: #202c45;
+  /* the earlier dark-mode walk: #243141 measured 1.04:1 on the Forest Green card a
+   * skeleton sits in, which is a loading state nobody can see. This is 1.48 on
+   * the card and 2.09 on the page — the same faint-but-there the parchment
+   * skeleton has (1.32 / 1.14). It is aria-hidden; the word "Loading…" is
+   * what a screen reader gets, so there is no AA threshold for it. */
+  --moh-skeleton: #2f5346;
+  --moh-scrim: rgb(5 8 12 / 0.65);
+  --moh-border: #b89a5a;
+
+  --moh-ink: #f4edda;
+  --moh-ink-muted: #c4bca6;
+  --moh-ink-inverse: #111722;
+  --moh-plain-ink: var(--moh-ink-muted);
+
+  /* On a dark surface full-strength gold carries meaning safely — 4.74:1 on
+   * Forest Green, 7.13:1 on the deepest ink — so it is the accent here. */
+  --moh-accent: #b89a5a;
+  --moh-accent-hover: #cbaf72;
+  --moh-accent-ink: #111722;
+
+  /* the design table gives #C4636B here. It measures 3.24:1 as text on the
+   * Forest Green raised surface, which fails AA, so it is lightened until it
+   * passes (4.72:1). the design says accessibility outranks the guide and that
+   * the colour changes, not the threshold; this is that rule applied to a
+   * value in the design's own table. Flagged for the maintainers in the pull request. */
+  --moh-danger: #d28a90;
+  --moh-danger-hover: #dea1a6;
+  --moh-danger-ink: #111722;
+
+  --moh-gold-line: #b89a5a;
+  --moh-gold-ink: #b89a5a;
+  --moh-gold-decor: #b89a5a;
+
+  --moh-sage: #8fa481;
+
+  --moh-parched: #dda974;
+  --moh-sated: #8ccbe0;
+  --moh-frost: #9dbbe6;
+  --moh-thriving: #9bcfa1;
+  --moh-ailing: #d28a90;
+}
+
+/* Whimsy at moments only, and never against the user's wishes. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,150 @@
+# Local development stack. The deployment.
+#
+#   make dev brings this up
+#   make fixtures loads the fixture data
+#
+# With MOH_MOCK_MODE=true the API serves fixtures and needs no database, so a
+# parts of the project can start before its dependencies exist.
+#
+# The three image directories follow the swarm stack exactly: a named volume each, mounted into the API for all three and into
+# the plates worker for plates, with the variable carrying the mount point. Nothing here is a
+# path on your machine, so `docker compose down -v` is the only thing that
+# removes a picture.
+
+name: herbology-dev
+
+# Shared by the four workers; the module is the only difference between them.
+x-moh-worker: &worker
+  build:
+    context: ../..
+    dockerfile: infra/docker/worker.Dockerfile
+  depends_on:
+    db: { condition: service_healthy }
+    redis: { condition: service_healthy }
+  volumes:
+    - ../../workers:/srv/workers:ro
+    - ../../fixtures:/srv/fixtures:ro
+
+x-moh-worker-env: &worker_env
+  MOH_DATABASE_URL: postgresql+asyncpg://herbology:herbology@db:5432/herbology
+  MOH_REDIS_URL: redis://redis:6379/0
+
+services:
+  db:
+    image: timescale/timescaledb:2.17.2-pg16
+    environment:
+      POSTGRES_USER: herbology
+      POSTGRES_PASSWORD: herbology
+      POSTGRES_DB: herbology
+    ports: ['5432:5432']
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ../../contracts/schema:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U herbology']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports: ['6379:6379']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports: ['1883:1883']
+    command: ['mosquitto', '-c', '/mosquitto-no-auth.conf']
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/api.Dockerfile
+    environment:
+      MOH_MOCK_MODE: ${MOH_MOCK_MODE:-true}
+      MOH_DATABASE_URL: postgresql+asyncpg://herbology:herbology@db:5432/herbology
+      MOH_REDIS_URL: redis://redis:6379/0
+      MOH_PUBLIC_BASE_URL: http://localhost:8000
+      # Set explicitly, as in the swarm stack: the hub's routes in this
+      # process read the round from it, and the hub drops its default.
+      MOH_API_URL: http://api:8000
+      # Mount points of the three image volumes below, served by the API.
+      MOH_GROUNDS_IMAGE_DIR: /srv/images/grounds
+      MOH_PLATES_IMAGE_DIR: /srv/images/plates
+      MOH_PHOTOS_IMAGE_DIR: /srv/images/photos
+    ports: ['8000:8000']
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    volumes:
+      - ../../api:/srv/api:ro
+      - ../../contracts:/srv/contracts:ro
+      - ../../fixtures:/srv/fixtures:ro
+      - grounds-images:/srv/images/grounds
+      - plates-images:/srv/images/plates
+      - photos-images:/srv/images/photos
+    command: ['uvicorn', 'app.main:app', '--host', '0.0.0.0', '--port', '8000', '--reload']
+
+  worker-weather:
+    <<: *worker
+    environment:
+      <<: *worker_env
+      WORKER_MODULE: workers.weather.tasks
+
+  worker-botany:
+    <<: *worker
+    environment:
+      <<: *worker_env
+      WORKER_MODULE: workers.botany.tasks
+
+  worker-hub:
+    <<: *worker
+    environment:
+      <<: *worker_env
+      WORKER_MODULE: workers.hub.tasks
+      # The notification jobs read this deployment's own API; same address the
+      # web service uses. No credential travels on that call.
+      MOH_API_URL: http://api:8000
+      # Empty: nobody is set up for notifications, which is the honest state
+      # of a dev stack. See .env.example.
+      MOH_HA_NOTIFY_SERVICE: ${MOH_HA_NOTIFY_SERVICE:-}
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      api: { condition: service_started }
+
+  worker-plates:
+    <<: *worker
+    environment:
+      <<: *worker_env
+      WORKER_MODULE: workers.plates.tasks
+      # Written here, served by the API from the same volume at the same path.
+      MOH_PLATES_IMAGE_DIR: /srv/images/plates
+    volumes:
+      - ../../workers:/srv/workers:ro
+      - ../../fixtures:/srv/fixtures:ro
+      - plates-images:/srv/images/plates
+
+  web:
+    image: node:22-slim
+    working_dir: /srv/web
+    environment:
+      MOH_API_URL: http://api:8000
+    ports: ['5173:5173']
+    volumes:
+      - ../../web:/srv/web
+    command: ['sh', '-c', 'npm install && npm run dev']
+    depends_on: [api]
+
+volumes:
+  db-data:
+  # Plans and surveys, plates and photographs
+  #. One mechanism, three times; the swarm stack carries the
+  # same three names.
+  grounds-images:
+  plates-images:
+  photos-images:

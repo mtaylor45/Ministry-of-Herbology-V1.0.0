@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The maskable app icon: the same lantern, inside the safe zone.
+
+  Android and iOS crop a maskable icon to whatever shape the launcher uses, so
+  everything that must survive sits inside the middle 80% (a circle of radius
+  40% about the centre). The ground runs edge to edge; the device does not.
+  Same mark and same rule-7 boundary as web/static/seal.svg.
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  role="img"
+  aria-label="The Ministry of Herbology: a lantern"
+>
+  <rect width="64" height="64" fill="#19382f" />
+  <g transform="translate(32 32) scale(0.66) translate(-32 -32)">
+    <circle cx="32" cy="32" r="31" fill="none" stroke="#b89a5a" stroke-width="2.4" />
+    <g fill="none" stroke="#b89a5a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="32" cy="14.5" r="3.4" />
+      <path d="M32 17.9 v3.2" />
+      <path d="M25 25.6 L39 25.6 L44 32 L20 32 Z" />
+      <path d="M22.4 35.4 L41.6 35.4" stroke-width="2.6" />
+      <path d="M23.6 35.4 v11.4 a6.4 6.4 0 0 0 6.4 6.4 h4 a6.4 6.4 0 0 0 6.4 -6.4 v-11.4" />
+    </g>
+    <path
+      d="M32 37.4 C35.6 42.2 36.6 45.5 34.4 47.9 C33.1 49.5 30.9 49.5 29.6 47.9 C27.4 45.5 28.4 42.2 32 37.4 Z"
+      fill="#f4edda"
+    />
+  </g>
+</svg>

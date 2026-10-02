@@ -1,0 +1,247 @@
+{
+  "name": "baseline_30d",
+  "site_id": "01890000-0000-7000-8000-000000000001",
+  "start": "2026-05-01",
+  "days": [
+    {
+      "date": "2026-05-01",
+      "tmin_c": 13.0,
+      "tmax_c": 22.0,
+      "precip_mm": 0.0,
+      "et0_mm": 3.6,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-02",
+      "tmin_c": 14.0,
+      "tmax_c": 23.0,
+      "precip_mm": 0.0,
+      "et0_mm": 3.96,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-03",
+      "tmin_c": 14.9,
+      "tmax_c": 23.9,
+      "precip_mm": 0.0,
+      "et0_mm": 4.28,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-04",
+      "tmin_c": 15.7,
+      "tmax_c": 24.7,
+      "precip_mm": 0.0,
+      "et0_mm": 4.53,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-05",
+      "tmin_c": 16.4,
+      "tmax_c": 25.4,
+      "precip_mm": 6.0,
+      "et0_mm": 4.67,
+      "condition": "rain"
+    },
+    {
+      "date": "2026-05-06",
+      "tmin_c": 16.8,
+      "tmax_c": 25.8,
+      "precip_mm": 0.0,
+      "et0_mm": 4.69,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-07",
+      "tmin_c": 17.0,
+      "tmax_c": 26.0,
+      "precip_mm": 0.0,
+      "et0_mm": 4.6,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-08",
+      "tmin_c": 16.9,
+      "tmax_c": 25.9,
+      "precip_mm": 0.0,
+      "et0_mm": 4.4,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-09",
+      "tmin_c": 16.6,
+      "tmax_c": 25.6,
+      "precip_mm": 0.0,
+      "et0_mm": 4.1,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-10",
+      "tmin_c": 16.1,
+      "tmax_c": 25.1,
+      "precip_mm": 6.0,
+      "et0_mm": 3.76,
+      "condition": "rain"
+    },
+    {
+      "date": "2026-05-11",
+      "tmin_c": 15.4,
+      "tmax_c": 24.4,
+      "precip_mm": 0.0,
+      "et0_mm": 3.39,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-12",
+      "tmin_c": 14.5,
+      "tmax_c": 23.5,
+      "precip_mm": 0.0,
+      "et0_mm": 3.05,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-13",
+      "tmin_c": 13.6,
+      "tmax_c": 22.6,
+      "precip_mm": 0.0,
+      "et0_mm": 2.77,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-14",
+      "tmin_c": 12.6,
+      "tmax_c": 21.6,
+      "precip_mm": 0.0,
+      "et0_mm": 2.58,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-15",
+      "tmin_c": 11.6,
+      "tmax_c": 20.6,
+      "precip_mm": 6.0,
+      "et0_mm": 2.5,
+      "condition": "rain"
+    },
+    {
+      "date": "2026-05-16",
+      "tmin_c": 10.7,
+      "tmax_c": 19.7,
+      "precip_mm": 0.0,
+      "et0_mm": 2.55,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-17",
+      "tmin_c": 10.0,
+      "tmax_c": 19.0,
+      "precip_mm": 0.0,
+      "et0_mm": 2.71,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-18",
+      "tmin_c": 9.4,
+      "tmax_c": 18.4,
+      "precip_mm": 0.0,
+      "et0_mm": 2.96,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-19",
+      "tmin_c": 9.1,
+      "tmax_c": 18.1,
+      "precip_mm": 0.0,
+      "et0_mm": 3.29,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-20",
+      "tmin_c": 9.0,
+      "tmax_c": 18.0,
+      "precip_mm": 6.0,
+      "et0_mm": 3.66,
+      "condition": "rain"
+    },
+    {
+      "date": "2026-05-21",
+      "tmin_c": 9.2,
+      "tmax_c": 18.2,
+      "precip_mm": 0.0,
+      "et0_mm": 4.01,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-22",
+      "tmin_c": 9.6,
+      "tmax_c": 18.6,
+      "precip_mm": 0.0,
+      "et0_mm": 4.32,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-23",
+      "tmin_c": 10.2,
+      "tmax_c": 19.2,
+      "precip_mm": 0.0,
+      "et0_mm": 4.55,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-24",
+      "tmin_c": 11.0,
+      "tmax_c": 20.0,
+      "precip_mm": 0.0,
+      "et0_mm": 4.68,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-25",
+      "tmin_c": 11.9,
+      "tmax_c": 20.9,
+      "precip_mm": 6.0,
+      "et0_mm": 4.69,
+      "condition": "rain"
+    },
+    {
+      "date": "2026-05-26",
+      "tmin_c": 12.9,
+      "tmax_c": 21.9,
+      "precip_mm": 0.0,
+      "et0_mm": 4.58,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-27",
+      "tmin_c": 13.9,
+      "tmax_c": 22.9,
+      "precip_mm": 0.0,
+      "et0_mm": 4.36,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-28",
+      "tmin_c": 14.8,
+      "tmax_c": 23.8,
+      "precip_mm": 0.0,
+      "et0_mm": 4.05,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-29",
+      "tmin_c": 15.6,
+      "tmax_c": 24.6,
+      "precip_mm": 0.0,
+      "et0_mm": 3.7,
+      "condition": "partly_cloudy"
+    },
+    {
+      "date": "2026-05-30",
+      "tmin_c": 16.3,
+      "tmax_c": 25.3,
+      "precip_mm": 6.0,
+      "et0_mm": 3.34,
+      "condition": "rain"
+    }
+  ]
+}

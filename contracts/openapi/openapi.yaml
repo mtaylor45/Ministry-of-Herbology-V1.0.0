@@ -1,0 +1,2071 @@
+openapi: 3.1.0
+info:
+  title: The Ministry of Herbology API
+  version: 1.10.0
+  description: |
+    Contract for the Ministry of Herbology. Frozen — only the maintainers
+    changes this file, via a recorded decision. Every path declares the parts of the project that
+    implements it with `x-parts of the project`; `tests/contract/` enforces that the
+    running API matches this document.
+
+    Units: millimetres, °C, litres, lux. Timestamps are RFC 3339 UTC.
+servers:
+  - url: /api/v1
+tags:
+  - name: inventory
+    description: Specimens, locations, members
+  - name: botany
+    description: Species, taxon resolution, care values
+  - name: almanac
+    description: Weather, forecast, conditions history
+  - name: tending
+    description: Care rules, tasks, calendar feeds
+  - name: grounds
+    description: Map layers, zones, pins
+  - name: journal
+    description: Plates and field notes
+  - name: hub
+    description: Sensors and integrations
+  - name: auth
+    description: The household's shared sign-in
+
+paths:
+  # ---------------------------------------------------------------- inventory
+  /specimens:
+    get:
+      tags: [inventory]
+      summary: List and search specimens
+      operationId: listSpecimens
+      parameters:
+        - { name: q,           in: query, schema: { type: string } }
+        - { name: location_id, in: query, schema: { type: string, format: uuid } }
+        - { name: outdoor,     in: query, schema: { type: boolean } }
+        - { name: status,      in: query, schema: { $ref: '#/components/schemas/SpecimenStatus' } }
+        - { name: toxic_to_pets, in: query, schema: { type: boolean } }
+        - { name: limit,  in: query, schema: { type: integer, default: 50, maximum: 200 } }
+        - { name: cursor, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: A page of specimens
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SpecimenPage' }
+    post:
+      tags: [inventory]
+      summary: Add a plant. Enrichment is queued and runs in the background.
+      operationId: createSpecimen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SpecimenCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Specimen' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /specimens/{specimen_id}:
+    parameters:
+      - { name: specimen_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [inventory]
+      operationId: getSpecimen
+      responses:
+        '200':
+          description: One specimen
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Specimen' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [inventory]
+      operationId: updateSpecimen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SpecimenUpdate' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Specimen' }
+    delete:
+      tags: [inventory]
+      summary: Archive a specimen (soft delete)
+      operationId: archiveSpecimen
+      responses:
+        '204': { description: Archived }
+
+  /specimens/{specimen_id}/photos:
+    parameters:
+      - { name: specimen_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [inventory]
+      operationId: listPhotos
+      parameters:
+        - name: order
+          in: query
+          required: false
+          schema: { type: string, enum: [newest, oldest], default: newest }
+          description: >-
+            A guarantee since 1.7.0, not a description: `newest`
+            is `taken_at` descending and is the default; `oldest` is ascending,
+            which is how a growth log is read. Before 1.7.0 the order was prose
+            and every client sorted for itself.
+      responses:
+        '200':
+          description: Growth log photos, in the requested order (newest first by default)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Photo' }
+    post:
+      tags: [inventory]
+      operationId: uploadPhoto
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:    { type: string, format: binary }
+                caption: { type: string }
+                taken_at:
+                  type: string
+                  format: date-time
+                  description: When the photograph was taken; defaults to now. Declared in 1.8.0.
+                is_primary:
+                  type: boolean
+                  default: false
+                  description: >-
+                    The Register's portrait for this plant. Exclusive per specimen:
+                    setting it on one photograph clears it on the others. 1.8.0.
+                member_id:
+                  type: string
+                  format: uuid
+                  description: Who took it, recorded as `photo.taken_by`. Optional, never required. 1.8.0.
+      responses:
+        '201':
+          description: Uploaded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Photo' }
+
+  /specimens/{specimen_id}/photos/{photo_id}/image:
+    parameters:
+      - { name: specimen_id, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: photo_id,    in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [inventory]
+      summary: A photograph's bytes
+      operationId: getPhotoImage
+      description: >-
+        What `Photo.url` points at; with `variant=thumb`, what `Photo.thumb_url`
+        points at. Declared in 1.8.0 for the third time on the
+        reasoning the design gave `getMapLayerImage` and the design gave
+        `getPlateImage`: the growth log fetches it for every photograph, so it
+        has a client contract. The inventory API served it and declared it
+        provisionally, as the maps module and the journal did.
+
+        Served only under its own specimen's path: the same `photo_id` under
+        another plant is a 404, because a photograph is a fact about one plant. The media type is the one the stored file's magic bytes
+        identify. An upload has no generated thumbnail in 1.x, so
+        `variant=thumb` on one serves the original.
+      parameters:
+        - name: variant
+          in: query
+          required: false
+          schema: { type: string, enum: [thumb] }
+      responses:
+        '200':
+          description: The image
+          content:
+            image/png:  { schema: { type: string, format: binary } }
+            image/jpeg: { schema: { type: string, format: binary } }
+        '404':
+          description: >-
+            No such photograph on this plant, or its file is missing from the
+            volume — what a restore that took the database and not the photo
+            volume looks like. Nothing is served in its place.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '503':
+          description: No photo directory is configured. Names `MOH_PHOTOS_IMAGE_DIR`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /specimens/{specimen_id}/log:
+    parameters:
+      - { name: specimen_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [inventory]
+      operationId: listLogEntries
+      parameters:
+        - name: order
+          in: query
+          required: false
+          schema: { type: string, enum: [newest, oldest], default: newest }
+          description: Same contract as `listPhotos`'s `order`, over `occurred_at`.
+      responses:
+        '200':
+          description: Log entries, in the requested order (newest first by default)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LogEntry' }
+    post:
+      tags: [inventory]
+      operationId: createLogEntry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LogEntryCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LogEntry' }
+
+  /locations:
+    get:
+      tags: [inventory]
+      operationId: listLocations
+      parameters:
+        - { name: site_id, in: query, schema: { type: string, format: uuid } }
+        - { name: outdoor, in: query, schema: { type: boolean } }
+      responses:
+        '200':
+          description: The site → area → zone tree, flattened
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Location' }
+    post:
+      tags: [inventory]
+      operationId: createLocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LocationCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Location' }
+
+  /locations/{location_id}:
+    parameters:
+      - { name: location_id, in: path, required: true, schema: { type: string, format: uuid } }
+    patch:
+      tags: [inventory]
+      operationId: updateLocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LocationCreate' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Location' }
+
+  /members:
+    get:
+      tags: [inventory]
+      operationId: listMembers
+      responses:
+        '200':
+          description: Household members
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Member' }
+
+  # ------------------------------------------------------------------- botany
+  /species:
+    get:
+      tags: [botany]
+      operationId: listSpecies
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Known species
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Species' }
+
+  /species/{species_id}:
+    parameters:
+      - { name: species_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [botany]
+      operationId: getSpecies
+      responses:
+        '200':
+          description: Species with its cited care profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Species' }
+
+  /species/{species_id}/care-values:
+    parameters:
+      - { name: species_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [botany]
+      summary: Every care field with its source and confidence
+      operationId: listCareValues
+      responses:
+        '200':
+          description: Cited care values
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CareValue' }
+    put:
+      tags: [botany]
+      summary: User override of a care value
+      operationId: overrideCareValue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CareValueOverride' }
+      responses:
+        '200':
+          description: Stored override
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CareValue' }
+
+  /taxon/resolve:
+    post:
+      tags: [botany]
+      summary: Resolve a typed name or photo to an accepted scientific name
+      operationId: resolveTaxon
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:      { type: string, description: Common or scientific name }
+                image_key: { type: string, description: Uploaded photo for Pl@ntNet ID }
+      responses:
+        '200':
+          description: Ranked candidate matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/TaxonCandidate' }
+
+  # ------------------------------------------------------------------ almanac
+  /almanac/forecast:
+    get:
+      tags: [almanac]
+      summary: 1-day (hourly) and 10-day (daily) forecast
+      operationId: getForecast
+      parameters:
+        - { name: site_id, in: query, required: true, schema: { type: string, format: uuid } }
+        - name: horizon
+          in: query
+          schema: { type: string, enum: [hourly, daily], default: daily }
+      responses:
+        '200':
+          description: Forecast series
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ForecastPoint' }
+
+  /almanac/history:
+    get:
+      tags: [almanac]
+      summary: 1 / 7 / 30-day indoor and outdoor conditions history
+      operationId: getHistory
+      parameters:
+        - name: window
+          in: query
+          required: true
+          schema: { type: string, enum: ['1d', '7d', '30d'] }
+        - { name: site_id,     in: query, schema: { type: string, format: uuid } }
+        - { name: location_id, in: query, schema: { type: string, format: uuid } }
+        - { name: specimen_id, in: query, schema: { type: string, format: uuid } }
+        - name: metric
+          in: query
+          schema:
+            type: string
+            enum: [temperature_c, humidity_pct, soil_moisture_pct, precip_mm, et0_mm]
+      responses:
+        '200':
+          description: Bucketed series ready for uPlot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Series' }
+
+  /almanac/water-balance/{specimen_id}:
+    parameters:
+      - { name: specimen_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [almanac]
+      summary: Soil water deficit history and current state
+      operationId: getWaterBalance
+      responses:
+        '200':
+          description: Water balance
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WaterBalance' }
+
+  /almanac/frost:
+    get:
+      tags: [almanac]
+      summary: Open frost alerts within the 72h lookahead
+      operationId: listFrostAlerts
+      responses:
+        '200':
+          description: Frost alerts, and the plants that could not be judged
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FrostReport' }
+
+  # ------------------------------------------------------------------ tending
+  /tending/rounds:
+    get:
+      tags: [tending]
+      summary: Morning Rounds — what needs doing today
+      operationId: getMorningRounds
+      parameters:
+        - { name: 'on', in: query, schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: Today's tasks, grouped
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MorningRounds' }
+
+  /tending/tasks:
+    get:
+      tags: [tending]
+      operationId: listTasks
+      parameters:
+        - { name: status,      in: query, schema: { $ref: '#/components/schemas/TaskStatus' } }
+        - { name: specimen_id, in: query, schema: { type: string, format: uuid } }
+        - { name: due_before,  in: query, schema: { type: string, format: date-time } }
+        - { name: due_after,   in: query, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: Tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Task' }
+
+  /tending/tasks/{task_id}/complete:
+    parameters:
+      - { name: task_id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [tending]
+      summary: One-tap completion
+      operationId: completeTask
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskCompletion' }
+      responses:
+        '200':
+          description: Completed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Task' }
+
+  /tending/tasks/complete-batch:
+    post:
+      tags: [tending]
+      summary: Batch completion from Morning Rounds
+      operationId: completeTasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [task_ids]
+              properties:
+                task_ids:
+                  type: array
+                  items: { type: string, format: uuid }
+                completed_by: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Completed tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Task' }
+
+  /tending/care-rules:
+    get:
+      tags: [tending]
+      operationId: listCareRules
+      parameters:
+        - { name: specimen_id, in: query, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Care rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CareRule' }
+    post:
+      tags: [tending]
+      operationId: createCareRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CareRule' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CareRule' }
+
+  /tending/feeds:
+    get:
+      tags: [tending]
+      summary: Calendar feeds for the household
+      operationId: listCalendarFeeds
+      responses:
+        '200':
+          description: Feeds
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CalendarFeed' }
+    post:
+      tags: [tending]
+      summary: Create a tokenized ICS feed for a member and filter set
+      operationId: createCalendarFeed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CalendarFeedCreate' }
+      responses:
+        '201':
+          description: Created; `webcal_url` is subscribable in Google and Apple Calendar
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CalendarFeed' }
+
+  /tending/feeds/{feed_id}/revoke:
+    parameters:
+      - { name: feed_id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [tending]
+      operationId: revokeCalendarFeed
+      responses:
+        '204': { description: Revoked }
+
+  /calendar/{token}.ics:
+    parameters:
+      - { name: token, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [tending]
+      summary: The ICS feed itself. Unauthenticated — the token is the secret.
+      operationId: getCalendarIcs
+      security: []
+      responses:
+        '200':
+          description: iCalendar document
+          content:
+            text/calendar:
+              schema: { type: string }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ------------------------------------------------------------------ grounds
+  /grounds/layers:
+    get:
+      tags: [grounds]
+      operationId: listMapLayers
+      responses:
+        '200':
+          description: Floor plans and property surveys
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MapLayer' }
+    post:
+      tags: [grounds]
+      summary: Upload a floor plan or survey image
+      operationId: createMapLayer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:    { type: string, format: binary }
+                name:    { type: string }
+                kind:    { type: string, enum: [floor_plan, survey] }
+                site_id: { type: string, format: uuid }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MapLayer' }
+
+  /grounds/layers/{layer_id}/calibration:
+    parameters:
+      - { name: layer_id, in: path, required: true, schema: { type: string, format: uuid } }
+    put:
+      tags: [grounds]
+      summary: Set the pixel↔world calibration points (survey) or px→mm scale (plan)
+      operationId: setCalibration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Calibration' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MapLayer' }
+
+  /grounds/layers/{layer_id}/image:
+    parameters:
+      - { name: layer_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [grounds]
+      summary: The layer's image bytes
+      operationId: getMapLayerImage
+      description: >-
+        What `MapLayer.image_url` points at. Declared in 1.5.0
+        because the map fetches it for **every** layer, so it is not an
+        operational endpoint with no client contract — it was briefly exempted
+        as one, and the maps module said plainly in #46 that the exemption was
+        wrong rather than leaving it to be found later.
+
+        The bytes are whatever the operator uploaded, served back unchanged, so
+        the media type is the one the upload's own magic bytes identified — never
+        the `Content-Type` the client claimed.
+      responses:
+        '200':
+          description: The image
+          content:
+            image/png:  { schema: { type: string, format: binary } }
+            image/jpeg: { schema: { type: string, format: binary } }
+        '404':
+          description: >-
+            No such layer, or its file is missing from the volume — which is
+            what a restore that took the database and not the image volume looks
+            like.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '503':
+          description: >-
+            No image directory is configured, so this deployment cannot serve
+            layer images at all. Names the variable.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /grounds/pins:
+    get:
+      tags: [grounds]
+      summary: Every specimen pin on a layer
+      operationId: listPins
+      parameters:
+        - { name: layer_id, in: query, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Pins
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Pin' }
+    put:
+      tags: [grounds]
+      summary: Place or move a specimen's pin
+      operationId: setPin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Pin' }
+      responses:
+        '200':
+          description: Placed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pin' }
+
+  # ------------------------------------------------------------------ journal
+  /journal/plates:
+    get:
+      tags: [journal]
+      operationId: listPlates
+      parameters:
+        - { name: approved, in: query, schema: { type: boolean } }
+      responses:
+        '200':
+          description: Plates for the book view
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Plate' }
+
+  /journal/plates/{plate_id}/image:
+    parameters:
+      - { name: plate_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [journal]
+      summary: The plate's image bytes
+      operationId: getPlateImage
+      description: >-
+        What `Plate.image_url` points at; with `variant=thumb`, what
+        `Plate.thumb_url` points at. Declared in 1.6.0 for the
+        reason the design declared `getMapLayerImage`: the book fetches it for
+        **every** plate, so it is not an operational endpoint with no client
+        contract. The journal served it, declared it provisionally, and asked
+        for the decision already made to be applied.
+
+        The media type is the one the stored file's own magic bytes identify,
+        never one a client or a catalogue claimed. A generated plate's bytes are
+        served exactly like a sourced one's — the label that tells them apart is
+        `Plate.origin`, rendered on the plate, not anything in this
+        response.
+      parameters:
+        - name: variant
+          in: query
+          required: false
+          schema: { type: string, enum: [thumb] }
+          description: Omit for the plate; `thumb` for the thumbnail.
+      responses:
+        '200':
+          description: The image
+          content:
+            image/png:  { schema: { type: string, format: binary } }
+            image/jpeg: { schema: { type: string, format: binary } }
+        '404':
+          description: >-
+            No such plate, or its file is missing from the volume — which is
+            what a restore that took the database and not the image volume looks
+            like. Nothing is served in its place: a stand-in in a book of plates
+            is a plate.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '503':
+          description: >-
+            No plate directory is configured, so this deployment cannot serve
+            plates at all. Names `MOH_PLATES_IMAGE_DIR`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /journal/plates/{plate_id}/approve:
+    parameters:
+      - { name: plate_id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [journal]
+      summary: The maintainers named member accepts this plate as this plant's portrait
+      operationId: approvePlate
+      description: >-
+        The only way `Plate.approved` becomes true. A pipeline can
+        establish that an image is licensed and that its record names the right
+        species; it cannot establish that it is a good picture of *this* plant.
+        Approval is a member's act, so the body names the member and nothing in
+        `workers/plates/` can call this on its own behalf.
+
+        `member_id` has no default. An approval whose author is unknown is the
+        one state `plate.approved_by` exists to rule out, so an unknown member
+        is a 422 rather than a guess.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [member_id]
+              properties:
+                member_id: { type: string, format: uuid }
+      responses:
+        '200':
+          description: The plate, now approved and naming who approved it
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Plate' }
+        '404':
+          description: No such plate
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '422':
+          description: No such member, or no member named
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /journal/coverage:
+    get:
+      tags: [journal]
+      summary: Which plants have a plate, which are waiting, and why a leaf is blank
+      operationId: getPlateCoverage
+      description: >-
+        The book pages through plants, not plates, so a plant with no plate is a
+        named blank leaf rather than a missing page. This route is how the book
+        says *why* the leaf is blank: the pipeline knows whether
+        nothing was found, a candidate had no usable licence, no generator is
+        configured, or there is nowhere to keep a plate, and a reader shown a
+        blank is owed that reason rather than a guess. The same shape the design
+        §2 gave `/almanac/frost` and the design gave
+        `MorningRounds.unscheduled`.
+      responses:
+        '200':
+          description: One entry per specimen in the register, plus the counts
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlateCoverage' }
+
+  /journal/{specimen_id}/notes:
+    parameters:
+      - { name: specimen_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [journal]
+      operationId: listFieldNotes
+      responses:
+        '200':
+          description: Field notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/FieldNote' }
+    post:
+      tags: [journal]
+      operationId: createFieldNote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string }
+                member_id:
+                  type: string
+                  format: uuid
+                  description: >-
+                    Who is writing. Optional and additive: the design
+                    picks the member at write time, and until 1.6.0 the body had
+                    no field to carry them. A note written without one omits
+                    `written_by` in the response rather than serving `null`.
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FieldNote' }
+
+  # ---------------------------------------------------------------------- hub
+  /hub/sensors:
+    get:
+      tags: [hub]
+      operationId: listSensorSources
+      responses:
+        '200':
+          description: Configured sensor sources
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SensorSource' }
+    post:
+      tags: [hub]
+      operationId: createSensorSource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SensorSource' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SensorSource' }
+
+  /hub/integrations:
+    get:
+      tags: [hub]
+      summary: Integration health for the Ministry Office
+      operationId: listIntegrations
+      responses:
+        '200':
+          description: Integrations with last-ok and last-error
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Integration' }
+
+  /hub/lunette:
+    get:
+      tags: [hub]
+      summary: Compact payload for the Lunette e-ink display
+      operationId: getLunetteFeed
+      description: >-
+        The one route an e-ink device can read without signing in: it also
+        accepts the operator's optional `moh_lunette_token` as a bearer token,
+        valid here and nowhere else, never in the query string.
+        The hub's own internal reads use the service token (§5). 1.10.0.
+      security:
+        - session: []
+        - lunette: []
+        - service: []
+      responses:
+        '200':
+          description: Today's rounds, weather and alerts, rendered small
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LunetteFeed' }
+
+  # --------------------------------------------------------------------- auth
+  # the design. The global `security: [session]` below has been the promise since
+  # an earlier release; these are the routes that issue and revoke the session. 1.10.0.
+  /auth/session:
+    get:
+      tags: [auth]
+      summary: Whether this device is signed in, and whether sign-in is required
+      operationId: getAuthSession
+      security: []
+      responses:
+        '200':
+          description: The sign-in state of this request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthStatus' }
+    post:
+      tags: [auth]
+      summary: Sign this device in with the household passphrase
+      description: >-
+        On success sets the `moh_session` cookie (HttpOnly, Secure, SameSite=Lax,
+        one year) and answers 204. The passphrase is compared in constant time
+        and never logged. Five failures in fifteen minutes from one client, or
+        twenty from any mix, answer 429 with `Retry-After`.
+      operationId: createAuthSession
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuthSignIn' }
+      responses:
+        '204': { description: Signed in; the session cookie is set }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '429':
+          description: Too many failed attempts; try again after `Retry-After` seconds
+          headers:
+            Retry-After: { schema: { type: integer } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [auth]
+      summary: Sign this device out
+      operationId: deleteAuthSession
+      responses:
+        '204': { description: Signed out; the cookie is cleared }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/sessions:
+    get:
+      tags: [auth]
+      summary: The household's signed-in devices
+      description: Labels and times only — never a token or a hash of one.
+      operationId: listAuthSessions
+      responses:
+        '200':
+          description: Active sessions, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/AuthSessionInfo' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [auth]
+      summary: Sign out every device, this one included
+      operationId: deleteAllAuthSessions
+      responses:
+        '204': { description: Every session revoked; this device's cookie is cleared }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /healthz:
+    get:
+      summary: Liveness
+      operationId: healthz
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:           { type: string }
+                  contract_version: { type: string }
+                  mode:
+                    type: string
+                    enum: [mock, live]
+                    description: Served ; declared in 1.7.0.
+                  scenario:
+                    type: [string, 'null']
+                    description: >-
+                      The selected weather scenario (`MOH_SCENARIO`: frost, storm,
+                      drought) or null when the deployment is reading the world.
+                      Declared in 1.7.0 because the offline cache is
+                      keyed on it: a round cached under one scenario must not be
+                      shown under another.
+
+components:
+  securitySchemes:
+    session:
+      type: apiKey
+      in: cookie
+      name: moh_session
+    # the stack's own services, GET only. Nginx deletes this header
+    # from every inbound request, so it is unusable from outside the stack.
+    service:
+      type: apiKey
+      in: header
+      name: X-Moh-Service-Token
+    # the Lunette's device token, valid on /hub/lunette only.
+    lunette:
+      type: http
+      scheme: bearer
+  responses:
+    Unauthorized:
+      description: Not signed in, or the session has expired or been revoked
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail: { type: string }
+        code:   { type: string }
+
+    Confidence:
+      type: string
+      enum: [high, medium, low, unknown]
+
+    AuthSignIn:
+      type: object
+      required: [passphrase]
+      properties:
+        passphrase: { type: string, minLength: 1, maxLength: 1024, writeOnly: true }
+
+    AuthStatus:
+      type: object
+      description: >-
+        `mode: open` is the demo with no passphrase configured — anyone can use
+        it, and the UI says so. A deployment is always `required`.
+      required: [mode, signed_in, expires_at]
+      properties:
+        mode:       { type: string, enum: [required, open] }
+        signed_in:  { type: boolean }
+        expires_at: { type: [string, 'null'], format: date-time }
+
+    AuthSessionInfo:
+      type: object
+      required: [label, created_at, last_seen_at, current]
+      properties:
+        label:        { type: string, description: 'Coarse device description, e.g. "Safari on iPhone"' }
+        created_at:   { type: string, format: date-time }
+        last_seen_at: { type: string, format: date-time }
+        current:      { type: boolean, description: This is the device asking }
+
+    Degradation:
+      type: object
+      description: >-
+        One named reason an answer is worth less than a measurement. `caps_at`
+        is a ceiling, not a subtraction: two doubts about the same input do not
+        make it twice as doubtful, and neither may raise the other's ceiling.
+        `detail` is a plain sentence, written to be shown to the reader as-is.
+      required: [code, detail, caps_at]
+      properties:
+        code:    { type: string, description: 'Stable machine name, e.g. et0_fallback' }
+        detail:  { type: string }
+        caps_at: { $ref: '#/components/schemas/Confidence' }
+
+    UnassessableSpecimen:
+      type: object
+      description: >-
+        A plant whose risk could not be judged, and why. Served as
+        `FrostReport.unassessable` and as `MorningRounds.unscheduled`.
+
+        The panel that renders this exists to *name* the plants nobody could
+        judge, so it carries the name. `specimen_id` alone forced every consumer
+        to make a second request to `/specimens` just to avoid printing a uuid
+        at a reader, and to print the uuid anyway when that request failed.
+        the design.
+
+        `specimen` is optional from 1.4.0 and **required in 2.0.0**, when
+        `specimen_id` is retired.
+        Populate it now; read it defensively until then.
+      required: [specimen_id, reason]
+      properties:
+        specimen_id:
+          type: string
+          format: uuid
+          deprecated: true
+          description: 'Retired in 2.0.0 — read `specimen.id` instead.'
+        specimen:    { $ref: '#/components/schemas/SpecimenBrief' }
+        reason:      { type: string }
+
+    FrostReport:
+      type: object
+      description: >-
+        Alerts and the plants that could not be assessed, together. A list of
+        alerts alone cannot say "and these three I could not judge", and an
+        unanswerable question must not read as a reassuring answer.
+      required: [alerts, unassessable]
+      properties:
+        alerts:
+          type: array
+          items: { $ref: '#/components/schemas/FrostAlert' }
+        unassessable:
+          type: array
+          items: { $ref: '#/components/schemas/UnassessableSpecimen' }
+
+    SpecimenStatus:
+      type: string
+      enum: [thriving, struggling, dormant, overwintering, lost, given_away, archived]
+
+    TaskStatus:
+      type: string
+      enum: [due, done, satisfied, skipped, cancelled]
+
+    TaskType:
+      type: string
+      enum: [water, fertilize, mist, prune, repot, inspect,
+             bring_indoors, return_outdoors, cover, rotate]
+
+    SunExposure:
+      type: string
+      enum: [full_sun, part_sun, part_shade, full_shade, unknown]
+
+    Member:
+      type: object
+      required: [id, name, role]
+      properties:
+        id:   { type: string, format: uuid }
+        name: { type: string }
+        role: { type: string, enum: [keeper, tender, observer] }
+        notify_prefs:
+          type: object
+          additionalProperties: true
+          description: >-
+            Open by design, with a stated convention. The block
+            the Home Assistant adapter reads:
+
+            ```json
+            {"home_assistant": {
+              "service": "notify.mobile_app_marks_phone",
+              "rounds": true, "frost": true, "health": true,
+              "rounds_hour": 7, "quiet_hours": [22, 7], "units": "metric"}}
+            ```
+
+            `service` is a Home Assistant service name, **not** a credential —
+            any domain is accepted, including `script.*`. A member with no
+            `service` is simply not a recipient, which is the normal state of a
+            household where one person has the companion app. `rounds_hour` is
+            the hour in the *site's* local time. Unknown keys are preserved.
+
+    Location:
+      type: object
+      required: [id, name, kind, is_outdoor]
+      properties:
+        id:           { type: string, format: uuid }
+        site_id:      { type: string, format: uuid }
+        parent_id:    { type: [string, 'null'], format: uuid }
+        name:         { type: string }
+        kind:         { type: string, enum: [area, zone, bed, room, shelf] }
+        is_outdoor:   { type: boolean }
+        is_covered:   { type: boolean }
+        sun_exposure: { $ref: '#/components/schemas/SunExposure' }
+        map_layer_id: { type: [string, 'null'], format: uuid }
+        boundary_px:
+          type: [array, 'null']
+          items:
+            type: array
+            items: { type: number }
+        specimen_count: { type: integer, readOnly: true }
+
+    LocationCreate:
+      type: object
+      required: [name, kind, is_outdoor]
+      properties:
+        site_id:      { type: string, format: uuid }
+        parent_id:    { type: [string, 'null'], format: uuid }
+        name:         { type: string }
+        kind:         { type: string, enum: [area, zone, bed, room, shelf] }
+        is_outdoor:   { type: boolean }
+        is_covered:   { type: boolean, default: false }
+        sun_exposure: { $ref: '#/components/schemas/SunExposure' }
+        map_layer_id:
+          type: [string, 'null']
+          format: uuid
+          description: >-
+            The layer this zone is drawn on. Additive in 1.5.0:
+            `Location` has carried `boundary_px` and `map_layer_id` since 1.0.0,
+            so a zone could be *read and drawn* but there was no contract-legal
+            way to **save** one — the body of `PATCH /locations/{id}` is this
+            schema, and it declared neither. The maps module's map could draw a
+            zone and had to say plainly that it could not persist it.
+        boundary_px:
+          type: [array, 'null']
+          description: >-
+            The zone's outline in **layer pixels**, as `[[x, y], …]`, matching
+            `Location.boundary_px`. Pixels rather than world coordinates for the
+            same reason pins are: recalibrating a layer then re-places every
+            boundary correctly, and a floor plan needs no fiction about where on
+            Earth it sits.
+          items:
+            type: array
+            items: { type: number }
+            minItems: 2
+            maxItems: 2
+
+    Specimen:
+      type: object
+      required: [id, is_outdoor, status, display_name]
+      properties:
+        id:              { type: string, format: uuid }
+        display_name:    { type: string, description: 'nickname, else common name, else accepted name' }
+        nickname:        { type: [string, 'null'] }
+        cultivar:        { type: [string, 'null'] }
+        species:         { $ref: '#/components/schemas/SpeciesBrief' }
+        is_group:        { type: boolean }
+        count:           { type: integer }
+        location:        { $ref: '#/components/schemas/Location' }
+        map_layer_id:    { type: [string, 'null'], format: uuid }
+        pin_px:          { $ref: '#/components/schemas/PixelPoint' }
+        is_outdoor:      { type: boolean }
+        in_container:    { type: boolean }
+        container_litres: { type: [number, 'null'] }
+        soil_note:       { type: [string, 'null'] }
+        acquired_on:     { type: [string, 'null'], format: date }
+        provenance:      { type: [string, 'null'] }
+        status:          { $ref: '#/components/schemas/SpecimenStatus' }
+        primary_photo_url: { type: [string, 'null'] }
+        next_task:
+          # Nothing scheduled is a normal state, and a common one.
+          anyOf: [{ $ref: '#/components/schemas/TaskBrief' }, { type: 'null' }]
+        created_at:      { type: string, format: date-time }
+
+    SpecimenBrief:
+      type: object
+      required: [id, display_name]
+      properties:
+        id:           { type: string, format: uuid }
+        display_name: { type: string }
+        is_outdoor:   { type: boolean }
+        thumb_url:    { type: [string, 'null'] }
+
+    SpecimenCreate:
+      type: object
+      required: [name]
+      properties:
+        name:         { type: string, description: Typed name; resolved to a species }
+        species_id:   { type: string, format: uuid, description: Skip resolution }
+        image_key:    { type: string, description: Photo for Pl@ntNet identification }
+        nickname:     { type: string }
+        cultivar:     { type: string }
+        location_id:  { type: string, format: uuid }
+        in_container: { type: boolean, default: true }
+        container_litres: { type: number }
+        count:        { type: integer, default: 1 }
+        acquired_on:  { type: string, format: date }
+        taxon:
+          description: >-
+            The match the person picked from `POST /taxon/resolve`, exactly as
+            returned. When given without `species_id`, the species is found by
+            gbif_key, powo_id or accepted name, or created from it, in the same
+            transaction; it is an identification, never a care fact. 1.10.0.
+          allOf: [{ $ref: '#/components/schemas/TaxonCandidate' }]
+
+    SpecimenUpdate:
+      type: object
+      properties:
+        species_id:      { type: string, format: uuid, description: 'Match this plant to a known species. 1.10.0.' }
+        taxon:
+          description: As on `SpecimenCreate` — match by a picked candidate. 1.10.0.
+          allOf: [{ $ref: '#/components/schemas/TaxonCandidate' }]
+        nickname:        { type: [string, 'null'] }
+        cultivar:        { type: [string, 'null'] }
+        location_id:     { type: [string, 'null'], format: uuid }
+        in_container:    { type: boolean }
+        container_litres: { type: [number, 'null'] }
+        soil_note:       { type: [string, 'null'] }
+        status:          { $ref: '#/components/schemas/SpecimenStatus' }
+        notes:           { type: [string, 'null'] }
+        water_k_c_override:           { type: [number, 'null'] }
+        water_interval_days_override: { type: [integer, 'null'] }
+        min_temp_c_override:          { type: [number, 'null'] }
+
+    SpecimenPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Specimen' }
+        next_cursor: { type: [string, 'null'] }
+        total:       { type: integer }
+
+    SpeciesBrief:
+      type: object
+      properties:
+        id:            { type: string, format: uuid }
+        accepted_name: { type: string }
+        common_name:   { type: [string, 'null'] }
+        family:        { type: [string, 'null'] }
+
+    Species:
+      allOf:
+        - $ref: '#/components/schemas/SpeciesBrief'
+        - type: object
+          properties:
+            common_names:     { type: array, items: { type: string } }
+            genus:            { type: [string, 'null'] }
+            native_range:     { type: array, items: { type: string } }
+            summary:          { type: [string, 'null'] }
+            light_label:      { type: [string, 'null'] }
+            water_k_c:        { type: [number, 'null'] }
+            water_interval_days: { type: [integer, 'null'] }
+            soil_ph_min:      { type: [number, 'null'] }
+            soil_ph_max:      { type: [number, 'null'] }
+            fertilizer_note:  { type: [string, 'null'] }
+            humidity_min_pct: { type: [integer, 'null'] }
+            min_temp_c:       { type: [number, 'null'] }
+            usda_zone_min:    { type: [string, 'null'] }
+            usda_zone_max:    { type: [string, 'null'] }
+            dormancy_months:  { type: array, items: { type: integer } }
+            toxic_to_pets:     { type: [boolean, 'null'] }
+            toxic_to_children: { type: [boolean, 'null'] }
+            toxicity_note:    { type: [string, 'null'] }
+            enrichment_state: { type: string, enum: [pending, running, complete, failed] }
+            sources:
+              type: array
+              items: { $ref: '#/components/schemas/SourceRef' }
+
+    SourceRef:
+      type: object
+      required: [id, kind, title]
+      properties:
+        id:      { type: string, format: uuid }
+        kind:    { type: string }
+        title:   { type: string }
+        url:     { type: [string, 'null'] }
+        license: { type: [string, 'null'] }
+        retrieved_at: { type: string, format: date-time }
+
+    CareValue:
+      type: object
+      required: [field, value, confidence]
+      description: |
+        The no-invented-plant-facts rule in the working agreement — no invented plant facts. A value with
+        no `source` must carry `confidence: unknown` unless it is a user override.
+      properties:
+        id:         { type: string, format: uuid }
+        field:      { type: string, example: water_k_c }
+        value:      {}
+        unit:       { type: [string, 'null'] }
+        source:
+          # This schema's own description says a value may have no source and
+          # must then be `confidence: unknown`. A bare $ref to an object made
+          # that state unsayable — the contract forbade the very case the no-invented-plant-facts rule
+          # exists to handle. the design.
+          anyOf: [{ $ref: '#/components/schemas/SourceRef' }, { type: 'null' }]
+        confidence: { $ref: '#/components/schemas/Confidence' }
+        is_user_override: { type: boolean }
+        note:       { type: [string, 'null'] }
+
+    CareValueOverride:
+      type: object
+      required: [field, value]
+      properties:
+        field: { type: string }
+        value: {}
+        unit:  { type: string }
+        note:  { type: string }
+
+    TaxonCandidate:
+      type: object
+      required: [accepted_name, confidence]
+      properties:
+        accepted_name: { type: string }
+        common_name:   { type: [string, 'null'] }
+        # POWO and GBIF index species, not cultivars, so the cultivar is split
+        # off the typed name during resolution and handed back here.
+        cultivar:      { type: [string, 'null'] }
+        family:        { type: [string, 'null'] }
+        rank:          { type: string }
+        gbif_key:      { type: [string, 'null'] }
+        powo_id:       { type: [string, 'null'] }
+        score:         { type: number }
+        confidence:    { $ref: '#/components/schemas/Confidence' }
+        source:        { $ref: '#/components/schemas/SourceRef' }
+
+    ForecastPoint:
+      type: object
+      required: [time]
+      properties:
+        time:            { type: string, format: date-time }
+        temperature_c:   { type: [number, 'null'] }
+        temp_min_c:      { type: [number, 'null'] }
+        temp_max_c:      { type: [number, 'null'] }
+        precip_mm:       { type: [number, 'null'] }
+        precip_prob_pct: { type: [number, 'null'] }
+        et0_mm:          { type: [number, 'null'] }
+        wind_kph:        { type: [number, 'null'] }
+        condition:       { type: [string, 'null'] }
+        sunrise:         { type: [string, 'null'], format: date-time }
+        sunset:          { type: [string, 'null'], format: date-time }
+
+    Series:
+      type: object
+      description: Column-oriented, ready to hand straight to uPlot.
+      required: [metric, times, values]
+      properties:
+        metric: { type: string }
+        unit:   { type: string }
+        times:  { type: array, items: { type: integer }, description: Unix seconds }
+        values: { type: array, items: { type: [number, 'null'] } }
+        min:    { type: array, items: { type: [number, 'null'] } }
+        max:    { type: array, items: { type: [number, 'null'] } }
+        label:  { type: string }
+
+    WaterBalance:
+      type: object
+      description: >-
+        A modelled soil-water deficit and what it is worth. Under the design
+        nothing measures the soil, so this engine alone decides whether an
+        outdoor plant is watered; a degraded input must leave here looking
+        degraded. `confidence`, `degraded` and `degradations` are required for
+        that reason — an answer without them is a degraded number wearing a
+        clean one's clothes. See the design.
+      required:
+        [specimen_id, deficit_mm, threshold_mm, is_due, applies,
+         confidence, degraded, degradations]
+      properties:
+        specimen_id:  { type: string, format: uuid }
+        deficit_mm:   { type: number }
+        capacity_mm:  { type: number }
+        threshold_mm: { type: number }
+        k_c:          { type: number }
+        is_due:       { type: boolean }
+        sensor_override_pct: { type: [number, 'null'] }
+        cover_factor: { type: number, description: 'Fraction of rain reaching the soil' }
+        status:
+          type: string
+          enum: [due, satisfied, ok]
+          description: >-
+            `satisfied` is not `ok`: a watering that was owed and that the
+            weather settled stays visible rather than vanishing.
+        satisfied_by: { type: [string, 'null'], enum: [rain, irrigation, null] }
+        applies:
+          type: boolean
+          description: >-
+            False for indoor specimens, which are watered on an interval rule and not by this engine. The deficit is then shown
+            for reference only.
+        note: { type: string }
+        confidence: { $ref: '#/components/schemas/Confidence' }
+        degraded:   { type: boolean }
+        degradations:
+          type: array
+          items: { $ref: '#/components/schemas/Degradation' }
+        k_c_confidence: { $ref: '#/components/schemas/Confidence' }
+        k_c_source:     { type: [string, 'null'] }
+        k_c_is_category_default:
+          type: boolean
+          description: 'the design — an FAO-56 category default, not a measurement'
+        days:
+          type: array
+          items:
+            type: object
+            properties:
+              day:              { type: string, format: date }
+              deficit_mm:       { type: number }
+              et0_mm:           { type: number, description: 'K_c x ET0 — the demand made on the soil' }
+              reference_et0_mm: { type: [number, 'null'] }
+              et0_method:
+                type: string
+                enum: [ingested, hargreaves, unavailable]
+                description: >-
+                  the design. `unavailable` does not advance the deficit — an
+                  unknown day is not a zero-evaporation day.
+              precip_mm:        { type: number }
+              gross_precip_mm:  { type: number }
+              irrigation_mm:    { type: number }
+              is_forecast:      { type: boolean }
+              status:           { type: string, enum: [due, satisfied, ok] }
+              satisfied_by:     { type: [string, 'null'], enum: [rain, irrigation, null] }
+
+    FrostAlert:
+      type: object
+      required:
+        [id, specimen, night_of, forecast_low_c, threshold_c, action,
+         confidence, degraded, degradations]
+      properties:
+        id:             { type: string, format: uuid }
+        specimen:       { $ref: '#/components/schemas/SpecimenBrief' }
+        night_of:       { type: string, format: date }
+        forecast_low_c: { type: number }
+        threshold_c:    { type: number }
+        action:         { type: string, enum: [bring_indoors, cover, monitor] }
+        advisory:       { type: [string, 'null'], description: 'NWS headline, if any' }
+        task_id:
+          type: [string, 'null']
+          format: uuid
+          description: >-
+            The task raised for this alert, **populated only by the scheduler's
+            surface** — `GET /tending/rounds`'s `alerts`. `GET /almanac/frost`
+            serves `null` here and always will.
+
+            That is a dependency direction, not an oversight. The alert is the
+            weather engine's object and the task is the scheduler's; the
+            scheduler reads the engine (`api/tending/` imports
+            `almanac.service`), so the engine filling a field that points at a
+            task would invert it. the design refuses that cycle for the
+            irrigation term and it is refused here for the same reason: a cycle
+            between the scheduler and the engine is how "why is this plant due?"
+            stops having an answer anybody can trace.
+
+            So a client that wants the alert *and* what is being done about it
+            reads the round, which is the screen that question belongs to
+            anyway. A client that wants only the risk reads the almanac.
+
+            Whether this field should sit on `FrostAlert` at all is a 2.0.0
+            question, with the rest of the breaking changes.
+          x-populated-by: tending
+        state:          { type: string, enum: [open, resolved, expired] }
+        confidence:     { $ref: '#/components/schemas/Confidence' }
+        degraded:       { type: boolean }
+        degradations:
+          type: array
+          items: { $ref: '#/components/schemas/Degradation' }
+
+    TaskBrief:
+      type: object
+      properties:
+        id:          { type: string, format: uuid }
+        task_type:   { $ref: '#/components/schemas/TaskType' }
+        due_at:      { type: string, format: date-time }
+        status:      { $ref: '#/components/schemas/TaskStatus' }
+        plain_title: { type: string }
+
+    Task:
+      type: object
+      description: >-
+        A task is the last link in a chain that starts at a care value and runs
+        through the water balance. the design made a degraded `WaterBalance` say
+        so; the design carries that the rest of the way, because the instruction
+        a person acts on is where it matters most. `confidence`, `degraded` and
+        `degradations` are required for the same reason they are on
+        `WaterBalance`: an answer that may omit them cannot be told apart from
+        one that had nothing to declare.
+      required:
+        [id, specimen, task_type, due_at, status, title, plain_title,
+         confidence, degraded, degradations]
+      properties:
+        id:          { type: string, format: uuid }
+        specimen:    { $ref: '#/components/schemas/SpecimenBrief' }
+        task_type:   { $ref: '#/components/schemas/TaskType' }
+        due_at:      { type: string, format: date-time }
+        all_day:     { type: boolean }
+        status:      { $ref: '#/components/schemas/TaskStatus' }
+        satisfied_by: { type: [string, 'null'], enum: [rain, sensor, forecast_change, manual, null] }
+        amount_ml:   { type: [integer, 'null'] }
+        priority:    { type: string, enum: [low, normal, urgent] }
+        title:       { type: string, description: 'Themed, e.g. "Tend the Monstera"' }
+        plain_title: { type: string, description: 'Plain equivalent, e.g. "Water the Monstera — 500 ml"' }
+        detail:      { type: [string, 'null'] }
+        completed_at: { type: [string, 'null'], format: date-time }
+        completed_by:
+          # A task that is not done has no completer. Served as null by every
+          # uncompleted task since 1.0.0, which a bare $ref to an object has
+          # always rejected. the design.
+          anyOf: [{ $ref: '#/components/schemas/Member' }, { type: 'null' }]
+        deep_link:   { type: string, description: '/specimen/{id}/tending' }
+        confidence:  { $ref: '#/components/schemas/Confidence' }
+        degraded:    { type: boolean }
+        degradations:
+          type: array
+          items: { $ref: '#/components/schemas/Degradation' }
+          description: >-
+            Each carries a plain sentence in `detail`, written to be shown to
+            the reader as-is. A task built on an unattested coefficient must not
+            arrive looking like a measurement.
+      # the design — "satisfied" with no stated cause is the failure the design
+      # was written about: an answer that reads as reassurance while carrying no
+      # information. A screen should never have to say "the API did not say what
+      # settled it". Checked here rather than asked for in prose.
+      if:
+        properties:
+          status: { const: satisfied }
+        required: [status]
+      then:
+        required: [satisfied_by]
+        properties:
+          satisfied_by:
+            type: string
+            enum: [rain, sensor, forecast_change, manual]
+
+    TaskCompletion:
+      type: object
+      properties:
+        completed_by: { type: string, format: uuid }
+        amount_ml:    { type: integer }
+        notes:        { type: string }
+        new_location_id:
+          type: string
+          format: uuid
+          description: Set when completing a bring_indoors task
+
+    MorningRounds:
+      type: object
+      description: >-
+        the design. A plant with no watering interval anywhere — no cited care
+        value, no species column, no household rule — generates no task, and a
+        plant with no task looks exactly like a plant that needs nothing.
+        `unscheduled` is the same hole `/almanac/frost` filled with
+        `unassessable`, in the screen people actually open every morning.
+      required: [date, due, satisfied, alerts, unscheduled]
+      properties:
+        date:      { type: string, format: date }
+        greeting:  { type: string }
+        due:
+          type: array
+          items: { $ref: '#/components/schemas/Task' }
+        satisfied:
+          type: array
+          items: { $ref: '#/components/schemas/Task' }
+          description: Waterings the rain or a sensor already covered
+        alerts:
+          type: array
+          items: { $ref: '#/components/schemas/FrostAlert' }
+        unscheduled:
+          type: array
+          items: { $ref: '#/components/schemas/UnassessableSpecimen' }
+          description: >-
+            Plants the scheduler could not give a task, each with the reason.
+            Silence has two meanings and this separates them.
+        weather: { $ref: '#/components/schemas/ForecastPoint' }
+
+    CareRule:
+      type: object
+      required: [task_type, strategy]
+      properties:
+        id:          { type: string, format: uuid }
+        species_id:  { type: [string, 'null'], format: uuid }
+        specimen_id: { type: [string, 'null'], format: uuid }
+        task_type:   { $ref: '#/components/schemas/TaskType' }
+        strategy:    { type: string, enum: [interval, water_balance, frost_guard, seasonal] }
+        base_interval_days: { type: [integer, 'null'] }
+        amount_ml:   { type: [integer, 'null'] }
+        modifiers:   { type: object, additionalProperties: true }
+        months:      { type: array, items: { type: integer } }
+        enabled:     { type: boolean }
+
+    CalendarFeed:
+      type: object
+      required: [id, name, webcal_url]
+      properties:
+        id:         { type: string, format: uuid }
+        member_id:  { type: string, format: uuid }
+        name:       { type: string }
+        webcal_url: { type: string, description: 'webcal://host/api/v1/calendar/{token}.ics' }
+        https_url:  { type: string }
+        filters:    { $ref: '#/components/schemas/CalendarFilters' }
+        push_target: { type: string, enum: [none, google, caldav] }
+        push_status:
+          type: string
+          enum: ['off', awaiting_operator, ok, failing]
+          description: >-
+            Whether this feed's calendar push is working. `off`
+            when `push_target` is `none`; `awaiting_operator` when it is
+            `caldav` and the operator has not provisioned the
+            `moh_caldav_<feed_id>` secret — a setup step, not a failure. 1.9.0.
+        push_last_ok_at: { type: [string, 'null'], format: date-time }
+        push_error:
+          type: [string, 'null']
+          description: >-
+            The last push failure as a sentence an operator can act on. Never
+            carries the CalDAV URL's credentials, the username or the password. 1.9.0.
+        last_rendered_at: { type: [string, 'null'], format: date-time }
+        revoked:    { type: boolean }
+
+    CalendarFeedCreate:
+      type: object
+      required: [member_id, name]
+      properties:
+        member_id: { type: string, format: uuid }
+        name:      { type: string }
+        filters:   { $ref: '#/components/schemas/CalendarFilters' }
+        push_target:
+          type: string
+          enum: [none, google, caldav]
+          default: none
+          description: >-
+            `google` is refused with a 422 in 1.x: Google push needs an OAuth
+            client and a per-member token store this project does not have. Subscribe to the ICS feed instead. `caldav` pushes
+            once the operator provisions the feed's secret.
+
+    CalendarFilters:
+      type: object
+      properties:
+        outdoor:      { type: [boolean, 'null'] }
+        task_types:
+          type: array
+          items: { $ref: '#/components/schemas/TaskType' }
+        location_ids:
+          type: array
+          items: { type: string, format: uuid }
+
+    PixelPoint:
+      type: [object, 'null']
+      properties:
+        x: { type: number }
+        y: { type: number }
+
+    MapLayer:
+      type: object
+      required: [id, name, kind, image_url, image_width_px, image_height_px]
+      properties:
+        id:              { type: string, format: uuid }
+        site_id:         { type: string, format: uuid }
+        name:            { type: string }
+        kind:            { type: string, enum: [floor_plan, survey] }
+        image_url:       { type: string }
+        image_width_px:  { type: integer }
+        image_height_px: { type: integer }
+        scale_mm_per_px: { type: [number, 'null'] }
+        calibration:     { $ref: '#/components/schemas/Calibration' }
+        ordinal:         { type: integer }
+
+    Calibration:
+      type: object
+      description: |
+        Floor plans use CRS.Simple and need only `scale_mm_per_px`. Surveys need
+        at least two pixel↔world point pairs to be georeferenced.
+
+        **Which half applies depends on the layer's `kind`, and the request body
+        does not carry it** — so the rule can only live in the API, and it does
+        (422, with the reason). Stated here because the document otherwise
+        permits PUTing survey points to a floor plan, which is nonsense a reader
+        should not have to discover from a rejection:
+
+        * `kind: floor_plan` — send `scale_mm_per_px` alone, **no `points`**. A
+          plan is a flat drawing; it has a scale, not a place on Earth.
+        * `kind: survey` — send **two or more** `points`. `scale_mm_per_px` is
+          *derived* from them and returned; sending it is not how a survey is
+          georeferenced.
+
+        `scale_mm_per_px` is therefore meaningful on both kinds — it is not
+        plan-only — which is why this stays one schema rather than two.
+
+        **There is no separate "uncalibrated" spelling.** Nothing here is
+        required, so `{"scale_mm_per_px": null, "points": []}` *is* the
+        uncalibrated state, and that is what the API serves from upload until
+        somebody calibrates. Whether a layer is calibrated is **derived** — a
+        plan when `scale_mm_per_px > 0`, a survey when it has two or more points
+        — never read off a null. the design explains why `MapLayer.calibration`
+        was deliberately *not* widened to accept `null`.
+      properties:
+        scale_mm_per_px: { type: [number, 'null'] }
+        points:
+          type: array
+          items:
+            type: object
+            required: [px, world]
+            properties:
+              px:    { type: array, items: { type: number }, minItems: 2, maxItems: 2 }
+              world: { type: array, items: { type: number }, minItems: 2, maxItems: 2 }
+
+    Pin:
+      type: object
+      required: [specimen_id, layer_id, px]
+      properties:
+        specimen_id: { type: string, format: uuid }
+        layer_id:    { type: string, format: uuid }
+        px:          { $ref: '#/components/schemas/PixelPoint' }
+        specimen:    { $ref: '#/components/schemas/SpecimenBrief' }
+
+    Plate:
+      type: object
+      required: [id, image_url, origin]
+      properties:
+        id:          { type: string, format: uuid }
+        species_id:  { type: [string, 'null'], format: uuid }
+        specimen_id: { type: [string, 'null'], format: uuid }
+        image_url:   { type: string }
+        thumb_url:   { type: [string, 'null'] }
+        origin:      { type: string, enum: [public_domain, generated, user_upload] }
+        license:     { type: [string, 'null'] }
+        attribution: { type: [string, 'null'] }
+        approved:    { type: boolean }
+        approved_by:
+          type: [string, 'null']
+          format: uuid
+          description: >-
+            The member who approved this plate, or null while nobody has. Set and cleared together with `approved`: a plate is never
+            approved by nobody, and never names an approver while unapproved.
+
+    PlateCoverage:
+      type: object
+      description: >-
+        What `/journal/coverage` serves. The five counts are the
+        ones the book prints above itself; `specimens` is one entry per plant in
+        the register, in register order, so the sum of the three states is
+        `total`.
+      required: [total, approved, waiting, absent, generated, specimens]
+      properties:
+        total:     { type: integer, minimum: 0 }
+        approved:  { type: integer, minimum: 0 }
+        waiting:   { type: integer, minimum: 0, description: Has a plate nobody has accepted yet }
+        absent:    { type: integer, minimum: 0, description: Has no plate at all }
+        generated: { type: integer, minimum: 0, description: Of the plates, how many are drawn by software }
+        specimens:
+          type: array
+          items: { $ref: '#/components/schemas/PlateCoverageEntry' }
+
+    PlateCoverageEntry:
+      type: object
+      description: >-
+        One plant's leaf, and why it is blank if it is. `specimen` is required —
+        every entry is about a plant, so there is always one to name. `reason_kind` and `reason` are set when and only when `state` is
+        `absent`; `plate_id` when and only when it is not.
+      required: [specimen, state]
+      properties:
+        specimen: { $ref: '#/components/schemas/SpecimenBrief' }
+        state:    { type: string, enum: [approved, waiting, absent] }
+        plate_id: { type: [string, 'null'], format: uuid }
+        reason_kind:
+          type: [string, 'null']
+          enum:
+            - no_candidate
+            - unlicensed_candidate
+            - generation_unavailable
+            - unusable_image
+            - store_unavailable
+            - not_run
+            - null
+          description: >-
+            Why there is no plate, from a closed set so the book can say each
+            one differently. `no_candidate`: every available catalogue was asked
+            and none had this species. `unlicensed_candidate`: a catalogue
+            offered one and stated no usable licence, so it was discarded rather
+            than relabelled. `generation_unavailable`: nothing was found and no
+            generator is configured. `unusable_image`: a candidate
+            would not decode or was out of bounds. `store_unavailable`: there is
+            nowhere to keep a plate (`MOH_PLATES_IMAGE_DIR`). `not_run`: sourcing
+            has never been attempted for this plant.
+        reason:
+          type: [string, 'null']
+          description: The pipeline's own sentence. Prose, not contract — branch on `reason_kind`.
+
+    FieldNote:
+      type: object
+      required: [id, body, written_at]
+      properties:
+        id:         { type: string, format: uuid }
+        body:       { type: string }
+        written_at: { type: string, format: date-time }
+        written_by: { $ref: '#/components/schemas/Member' }
+
+    Photo:
+      type: object
+      required: [id, url, taken_at]
+      properties:
+        id:         { type: string, format: uuid }
+        url:        { type: string }
+        thumb_url:
+          type: [string, 'null']
+          description: >-
+            Null for an uploaded photograph in 1.x: the deployment carries no
+            image decoder, and a thumbnail produced by guessing would be a second
+            parser. Clients read `thumb_url ?? url`.
+        taken_at:   { type: string, format: date-time }
+        caption:    { type: [string, 'null'] }
+        is_primary: { type: boolean }
+        log_entry_id:
+          type: [string, 'null']
+          format: uuid
+          description: >-
+            The growth-log entry this photograph illustrates, or null. The join lives on `log_entry.photo_id`; this is it read the
+            other way, so a photograph can say which entry it belongs to without
+            a client walking the whole log. Null is the normal state: most
+            photographs are a portrait, not an illustration of an event. When
+            more than one entry cites the photograph, this is the earliest by
+            `occurred_at`, then by id — a photograph may illustrate
+            two events, and the field names the first.
+
+    LogEntry:
+      type: object
+      required: [id, kind, occurred_at]
+      properties:
+        id:          { type: string, format: uuid }
+        kind:        { type: string, enum: [growth, pest, disease, repot, prune, relocate, note] }
+        occurred_at: { type: string, format: date-time }
+        body:        { type: [string, 'null'] }
+        photo:
+          # Most log entries carry no photo.
+          anyOf: [{ $ref: '#/components/schemas/Photo' }, { type: 'null' }]
+        data:        { type: object, additionalProperties: true }
+
+    LogEntryCreate:
+      type: object
+      required: [kind]
+      properties:
+        kind:        { type: string, enum: [growth, pest, disease, repot, prune, relocate, note] }
+        body:        { type: string }
+        occurred_at: { type: string, format: date-time }
+        photo_id:
+          type: string
+          format: uuid
+          description: Must name one of this specimen's own photographs, or the request is a 422.
+        member_id:
+          type: string
+          format: uuid
+          description: Who is writing, recorded as `log_entry.logged_by`. Optional. 1.8.0.
+        data:
+          type: object
+          additionalProperties: true
+          description: >-
+            Kind-specific detail, as `LogEntry.data` serves it. A hand-written
+            `relocate` carries `{from_location_id, to_location_id}`. 1.8.0.
+
+    SensorSource:
+      type: object
+      required: [name, adapter]
+      properties:
+        id:           { type: string, format: uuid }
+        name:         { type: string }
+        adapter:      { type: string, enum: [home_assistant, ecowitt, miflora, homekit, nest, manual] }
+        external_ids:
+          type: object
+          additionalProperties: { type: string }
+          description: >-
+            Metric name to the upstream entity that carries it, e.g.
+            `{"temperature_c": "sensor.greenhouse_temp"}`. Open for metrics this
+            app does not know about; the keys it does know are the reading
+            kinds. the design.
+        location_id:  { type: [string, 'null'], format: uuid }
+        specimen_id:  { type: [string, 'null'], format: uuid }
+        poll_seconds: { type: integer }
+        enabled:      { type: boolean }
+        last_seen_at: { type: [string, 'null'], format: date-time }
+
+    Integration:
+      type: object
+      description: >-
+        One connected thing and whether it is answering. `status` is computed
+        from `enabled`, `last_ok_at` and `last_error` — it is not a column, so
+        it cannot disagree with them. Optional from 1.4.0,
+        **required in 2.0.0**.
+      required: [id, kind, name, enabled]
+      properties:
+        id:         { type: string, format: uuid }
+        kind:       { type: string }
+        name:       { type: string }
+        enabled:    { type: boolean }
+        status:
+          type: string
+          enum: [ok, degraded, down, stale, unconfigured]
+          description: >-
+            `stale` is the one `last_ok_at` and `last_error` cannot express:
+            answering, never erroring, and quietly hours behind. It is the
+            silent failure, so the server decides the threshold once rather
+            than each client inventing its own. `stale` with `last_ok_at: null`
+            means configured and never heard from since setup; `unconfigured`
+            with `enabled: false` means switched off. Neither is
+            `down`, and `unconfigured` on a fresh deployment is a setup step,
+            not a fault.
+        last_ok_at: { type: [string, 'null'], format: date-time }
+        last_error: { type: [string, 'null'] }
+
+    LunetteFeed:
+      type: object
+      properties:
+        generated_at: { type: string, format: date-time }
+        headline:     { type: string }
+        due_count:    { type: integer }
+        lines:        { type: array, items: { type: string } }
+        temp_outdoor_c: { type: [number, 'null'] }
+        temp_indoor_c:  { type: [number, 'null'] }
+        frost_warning:  { type: [string, 'null'] }
+
+security:
+  - session: []

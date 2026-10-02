@@ -1,0 +1,202 @@
+{
+  "name": "drought",
+  "site_id": "01890000-0000-7000-8000-000000000001",
+  "start": "2026-06-01",
+  "days": [
+    {
+      "date": "2026-06-01",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-02",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-03",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-04",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-05",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-06",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-07",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-08",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-09",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-10",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-11",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-12",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-13",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-14",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-15",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-16",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-17",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-18",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-19",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-20",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-06-21",
+      "tmin_c": 17.0,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    }
+  ],
+  "advisories": [],
+  "expect": {
+    "description": "Three weeks without rain. Containers cross their threshold first, open ground much later, and a drought-adapted plant last of all. Nothing is ever 'satisfied by rain'.",
+    "assertions": [
+      {
+        "specimen": "01890040-0000-7000-8000-000000000004",
+        "by_day": 4,
+        "water_task_status": "due",
+        "note": "45 L lemon: capacity 32.8 mm, K_c 0.9 \u2014 4.9 mm/day"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000007",
+        "by_day": 8,
+        "water_task_status": "due",
+        "note": "in-ground rose draws on a 60 mm profile at K_c 0.85"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000006",
+        "by_day": 15,
+        "water_task_status": "due",
+        "note": "lavender is drought-adapted, K_c 0.45 \u2014 it must not be nagged for a fortnight"
+      },
+      {
+        "satisfied_by_rain_count": 0
+      }
+    ]
+  }
+}

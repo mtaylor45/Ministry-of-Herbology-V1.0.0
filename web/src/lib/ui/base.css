@@ -1,0 +1,130 @@
+/* Base styles built on the tokens. The design system. */
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--moh-surface);
+  color: var(--moh-ink);
+  font-family: var(--moh-font-body);
+  font-size: var(--moh-text-base);
+  line-height: 1.55;
+  /* room for the bottom nav plus the home indicator */
+  padding-bottom: calc(var(--moh-tap) + env(safe-area-inset-bottom) + var(--moh-space-4));
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--moh-font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 var(--moh-space-3);
+}
+
+h1 {
+  font-size: var(--moh-text-2xl);
+}
+h2 {
+  font-size: var(--moh-text-xl);
+}
+h3 {
+  font-size: var(--moh-text-lg);
+}
+
+a {
+  color: var(--moh-accent);
+}
+
+/* §19: a thin brass line under the text on hover. `--moh-gold-line` is the
+   derived brass that clears 3:1 on every light surface; full-strength gold does
+   not, and an underline that carries the hover state is not decoration. */
+a:hover {
+  text-decoration-color: var(--moh-gold-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+/* The focus ring stays on `--moh-accent`, not on the brass. the design permits the
+   brass here — 3.42:1 clears the 3:1 non-text threshold — but the accent reaches
+   8.25:1 on parchment and 4.74:1 on greenhouse, and a focus ring is the one mark
+   in the app that should never be the subtle one. The brass carries borders and
+   rules instead. */
+:focus-visible {
+  outline: 3px solid var(--moh-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Announced by screen readers, invisible on screen. The plain-language half of
+   every themed string lives here when the themed one is what's shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* §18: a page transition that fades with a slight vertical movement — but
+   only between the facets of one plant, where leafing from its register to its
+   tending is the page turn the guide describes. The shell (Nav.svelte) decides
+   *that* a turn is happening and writes `data-transition` on the document for
+   the duration; everything about how it moves is here. Out on the quick
+   token, in on the sheet token: half a second of ceremony between tapping a
+   facet and reading it is ceremony charged to someone standing in the rain. Reduced motion removes it here, in the stylesheet, so it holds
+   before hydration and whatever a script does. */
+@keyframes moh-leaf-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes moh-leaf-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+html[data-transition='facet']::view-transition-old(root) {
+  animation: moh-leaf-out var(--moh-motion-quick) var(--moh-motion-ease) both;
+}
+html[data-transition='facet']::view-transition-new(root) {
+  animation: moh-leaf-in var(--moh-motion-sheet) var(--moh-motion-ease) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--moh-space-2);
+  top: -3rem;
+  z-index: 100;
+  background: var(--moh-accent);
+  color: var(--moh-accent-ink);
+  padding: var(--moh-space-2) var(--moh-space-4);
+  border-radius: var(--moh-radius);
+  transition: top 120ms var(--moh-motion-ease);
+}
+
+.skip-link:focus {
+  top: var(--moh-space-2);
+}

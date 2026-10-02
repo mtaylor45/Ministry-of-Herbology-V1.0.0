@@ -1,0 +1,340 @@
+{
+  "offset": 0,
+  "limit": 5,
+  "endOfRecords": true,
+  "count": 2,
+  "results": [
+    {
+      "key": 11041822,
+      "nameKey": 33130673,
+      "datasetKey": "d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+      "constituentKey": "7ddf754f-d193-4cc9-b351-99906754a03b",
+      "nubKey": 11041822,
+      "parentKey": 2752062,
+      "parent": "Dracaena",
+      "basionymKey": 2770610,
+      "basionym": "Sansevieria trifasciata Prain",
+      "kingdom": "Plantae",
+      "phylum": "Tracheophyta",
+      "order": "Asparagales",
+      "family": "Asparagaceae",
+      "genus": "Dracaena",
+      "species": "Dracaena trifasciata",
+      "kingdomKey": 6,
+      "phylumKey": 7707728,
+      "classKey": 196,
+      "orderKey": 1169,
+      "familyKey": 7683,
+      "genusKey": 2752062,
+      "speciesKey": 11041822,
+      "scientificName": "Dracaena trifasciata (Prain) Mabb.",
+      "canonicalName": "Dracaena trifasciata",
+      "authorship": "(Prain) Mabb.",
+      "publishedIn": "Mabberley's Pl.-Book, ed. 4: 1101 (2017)",
+      "nameType": "SCIENTIFIC",
+      "taxonomicStatus": "ACCEPTED",
+      "rank": "SPECIES",
+      "origin": "SOURCE",
+      "numDescendants": 3,
+      "numOccurrences": 0,
+      "taxonID": "gbif:11041822",
+      "extinct": false,
+      "habitats": [
+        "TERRESTRIAL"
+      ],
+      "nomenclaturalStatus": [],
+      "threatStatuses": [],
+      "descriptions": [
+        {
+          "description": "África"
+        },
+        {
+          "description": "Sansevieria trifasciata Prain"
+        },
+        {
+          "description": "Plantas vasculares"
+        },
+        {
+          "description": "FALSO"
+        },
+        {
+          "description": "FALSO"
+        },
+        {
+          "description": "Andina | Caribe | Orinoquia | Pacifico | Insular"
+        },
+        {
+          "description": "100 - 2000 msnm"
+        }
+      ],
+      "vernacularNames": [
+        {
+          "vernacularName": "Snake plant, Mother-in-law's tongue, Viper's bowstring hemp, Snake Sansevieria, Bowstring hemp, Good luck plant, Mother-in-law's nose",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Langue de belle-mère",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "Svärmors tunga",
+          "language": "swe"
+        },
+        {
+          "vernacularName": "Langue à la belle-méthe"
+        },
+        {
+          "vernacularName": "Svigermorstunge",
+          "language": "nor"
+        },
+        {
+          "vernacularName": "Schwéiermammszongen",
+          "language": "ltz"
+        },
+        {
+          "vernacularName": "サンセベリア",
+          "language": "jpn"
+        },
+        {
+          "vernacularName": "Lidah mertua",
+          "language": "ind"
+        },
+        {
+          "vernacularName": "Isoanopinkieli",
+          "language": "fin"
+        },
+        {
+          "vernacularName": "Skoonma-se-tong",
+          "language": "afr"
+        },
+        {
+          "vernacularName": "sanseviéria",
+          "language": "por"
+        },
+        {
+          "vernacularName": "rabo-de-lagarto",
+          "language": "por"
+        },
+        {
+          "vernacularName": "língua-de-sogra",
+          "language": "por"
+        },
+        {
+          "vernacularName": "espadinha",
+          "language": "por"
+        },
+        {
+          "vernacularName": "espada-de-são-jorge",
+          "language": "por"
+        }
+      ],
+      "synonym": false,
+      "higherClassificationMap": {
+        "6": "Plantae",
+        "7707728": "Tracheophyta",
+        "196": "Liliopsida",
+        "1169": "Asparagales",
+        "7683": "Asparagaceae",
+        "2752062": "Dracaena"
+      },
+      "class": "Liliopsida"
+    },
+    {
+      "key": 2770610,
+      "nameKey": 10042116,
+      "datasetKey": "d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+      "constituentKey": "7ddf754f-d193-4cc9-b351-99906754a03b",
+      "nubKey": 2770610,
+      "parentKey": 2752062,
+      "parent": "Dracaena",
+      "acceptedKey": 11041822,
+      "accepted": "Dracaena trifasciata (Prain) Mabb.",
+      "kingdom": "Plantae",
+      "phylum": "Tracheophyta",
+      "order": "Asparagales",
+      "family": "Asparagaceae",
+      "genus": "Dracaena",
+      "species": "Dracaena trifasciata",
+      "kingdomKey": 6,
+      "phylumKey": 7707728,
+      "classKey": 196,
+      "orderKey": 1169,
+      "familyKey": 7683,
+      "genusKey": 2752062,
+      "speciesKey": 11041822,
+      "scientificName": "Sansevieria trifasciata Prain",
+      "canonicalName": "Sansevieria trifasciata",
+      "authorship": "Prain",
+      "publishedIn": "Bengal Pl. 2: 1054 (1903)",
+      "nameType": "SCIENTIFIC",
+      "taxonomicStatus": "SYNONYM",
+      "rank": "SPECIES",
+      "origin": "SOURCE",
+      "numDescendants": 0,
+      "numOccurrences": 0,
+      "taxonID": "gbif:2770610",
+      "extinct": false,
+      "habitats": [
+        "TERRESTRIAL",
+        "TERRESTRIAL",
+        "TERRESTRIAL",
+        "FRESHWATER"
+      ],
+      "nomenclaturalStatus": [],
+      "threatStatuses": [
+        "NOT_APPLICABLE",
+        "NOT_APPLICABLE",
+        "NOT_EVALUATED"
+      ],
+      "descriptions": [
+        {
+          "description": "Exótica"
+        },
+        {
+          "description": "Cultivada"
+        },
+        {
+          "description": "África"
+        },
+        {
+          "description": "Andes, Islas Caribeñas, Llanura del Caribe, Orinoquia, Pacífico"
+        },
+        {
+          "description": "100 - 2000 msnm"
+        },
+        {
+          "description": "Habita entre los 0 y los 2200 msnm"
+        }
+      ],
+      "vernacularNames": [
+        {
+          "vernacularName": "svärmorstunga",
+          "language": "swe"
+        },
+        {
+          "vernacularName": "snake plant"
+        },
+        {
+          "vernacularName": "mother-in-law's tongue"
+        },
+        {
+          "vernacularName": "Bajonetplante",
+          "language": "dan"
+        },
+        {
+          "vernacularName": "Viper's bowstring hemp",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "sansevieria",
+          "language": "spa"
+        },
+        {
+          "vernacularName": "snakeplant",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "chanvre d'Afrique",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "svärmors tunga",
+          "language": "swe"
+        },
+        {
+          "vernacularName": "konje-hemp",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "lengua de suegra",
+          "language": "spa"
+        },
+        {
+          "vernacularName": "mother-in-law's-tongue",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "African bowstring-hemp",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Viper's bowstring hemp",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "viper's bowstring hemp",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "sanseveria",
+          "language": "por"
+        },
+        {
+          "vernacularName": "língua-de-sogra",
+          "language": "por"
+        },
+        {
+          "vernacularName": "espada-de-são-jorge",
+          "language": "por"
+        },
+        {
+          "vernacularName": "‘alelo"
+        },
+        {
+          "vernacularName": "viper's bowstring hemp"
+        },
+        {
+          "vernacularName": "tigre"
+        },
+        {
+          "vernacularName": "snakeplant"
+        },
+        {
+          "vernacularName": "sansevieria"
+        },
+        {
+          "vernacularName": "riri"
+        },
+        {
+          "vernacularName": "ngata"
+        },
+        {
+          "vernacularName": "mother-in-law's tongue"
+        },
+        {
+          "vernacularName": "lengua de suegra"
+        },
+        {
+          "vernacularName": "langue de belle-mère"
+        },
+        {
+          "vernacularName": "konje hemp"
+        },
+        {
+          "vernacularName": "kitelel"
+        },
+        {
+          "vernacularName": "chanvre d'Afrique"
+        },
+        {
+          "vernacularName": "bowstring hemp"
+        },
+        {
+          "vernacularName": "African bowstring hemp"
+        }
+      ],
+      "synonym": true,
+      "higherClassificationMap": {
+        "6": "Plantae",
+        "7707728": "Tracheophyta",
+        "196": "Liliopsida",
+        "1169": "Asparagales",
+        "7683": "Asparagaceae",
+        "2752062": "Dracaena",
+        "11041822": "Dracaena trifasciata"
+      },
+      "class": "Liliopsida"
+    }
+  ],
+  "facets": []
+}

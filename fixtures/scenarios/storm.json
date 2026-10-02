@@ -1,0 +1,154 @@
+{
+  "name": "storm",
+  "site_id": "01890000-0000-7000-8000-000000000001",
+  "start": "2026-07-01",
+  "days": [
+    {
+      "date": "2026-07-01",
+      "tmin_c": 17.6,
+      "tmax_c": 28.4,
+      "precip_mm": 0.0,
+      "et0_mm": 4.6,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-07-02",
+      "tmin_c": 18.0,
+      "tmax_c": 29.3,
+      "precip_mm": 0.0,
+      "et0_mm": 4.8,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-07-03",
+      "tmin_c": 18.4,
+      "tmax_c": 30.2,
+      "precip_mm": 0.0,
+      "et0_mm": 5.0,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-07-04",
+      "tmin_c": 18.8,
+      "tmax_c": 31.0,
+      "precip_mm": 0.0,
+      "et0_mm": 5.2,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-07-05",
+      "tmin_c": 19.1,
+      "tmax_c": 31.6,
+      "precip_mm": 0.0,
+      "et0_mm": 5.4,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-07-06",
+      "tmin_c": 19.4,
+      "tmax_c": 32.1,
+      "precip_mm": 0.0,
+      "et0_mm": 5.5,
+      "condition": "clear"
+    },
+    {
+      "date": "2026-07-07",
+      "tmin_c": 16.0,
+      "tmax_c": 22.0,
+      "precip_mm": 38.0,
+      "et0_mm": 1.2,
+      "condition": "rain"
+    },
+    {
+      "date": "2026-07-08",
+      "tmin_c": 16.0,
+      "tmax_c": 25.0,
+      "precip_mm": 0.0,
+      "et0_mm": 3.4,
+      "condition": "cloudy"
+    },
+    {
+      "date": "2026-07-09",
+      "tmin_c": 16.0,
+      "tmax_c": 25.0,
+      "precip_mm": 0.0,
+      "et0_mm": 3.4,
+      "condition": "cloudy"
+    },
+    {
+      "date": "2026-07-10",
+      "tmin_c": 16.0,
+      "tmax_c": 25.0,
+      "precip_mm": 0.0,
+      "et0_mm": 3.4,
+      "condition": "cloudy"
+    }
+  ],
+  "advisories": [],
+  "expect": {
+    "description": "Six rainless days of building July heat, broken on day 7 by 38 mm, then three days in which the deficit begins to rebuild. Outdoor specimens under open sky that had crossed their threshold show 'satisfied by rain' rather than having their task vanish. Covered and indoor ones do not. And a plant that had not crossed its threshold is 'ok', not 'satisfied': the rain settled nothing it owed.",
+    "rain_day_index": 6,
+    "read_on_the_rain_day": "Every assertion below is about day 6. The water balance reports the state of its newest day, so a series replayed to day 9 honestly says 'ok' \u2014 the deficit has rebuilt \u2014 and the satisfied state is gone. Set MOH_SCENARIO_DAY=2026-07-07 to stand on the day it rained. That is the switch this scenario is read through, and the reason the recording does not simply stop at the downpour.",
+    "assertions": [
+      {
+        "specimen": "01890040-0000-7000-8000-000000000004",
+        "on_day": 6,
+        "water_task_status": "satisfied",
+        "satisfied_by": "rain",
+        "note": "45 L lemon on the uncovered Back Terrace: 0.9 x 30.5 mm of ET0 over six days crosses its 19.65 mm threshold, and 38 mm clears it"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000010",
+        "on_day": 6,
+        "water_task_status": "satisfied",
+        "satisfied_by": "rain",
+        "note": "8 L basil on the same terrace; a small pot is due by day 2"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000005",
+        "on_day": 6,
+        "water_task_status": "due",
+        "note": "Covered Porch: f_cover = 0, so the rain never reaches it and the watering stays owed. The most-got-wrong term in the equation"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000011",
+        "on_day": 6,
+        "water_task_status": "due",
+        "note": "also on the Covered Porch, and also still owed"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000007",
+        "on_day": 6,
+        "water_task_status": "ok",
+        "satisfied_by": null,
+        "note": "The in-ground rose. This assertion said 'satisfied' to an earlier release and was never true: a 60 mm soil profile at K_c 0.85 needs 42 mm of ET0 to cross its threshold and six days of this heat supply 30.5, so the rose was never due. A watering that was never owed cannot be settled by rain, and reporting it as such would claim credit for work nobody needed"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000006",
+        "on_day": 6,
+        "water_task_status": "ok",
+        "satisfied_by": null,
+        "note": "the drought-adapted lavender hedge, for the same reason and more so at K_c 0.45. 'ok' is not 'satisfied', and keeping them apart is what makes the satisfied section mean anything"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000008",
+        "on_day": 6,
+        "water_task_status": "ok",
+        "satisfied_by": null,
+        "note": "in-ground hostas in the uncovered North Shade Bed; also never due"
+      },
+      {
+        "specimen": "01890040-0000-7000-8000-000000000001",
+        "on_day": 6,
+        "water_task_status": "due",
+        "note": "indoor, interval rule, unaffected by weather"
+      },
+      {
+        "satisfied_task_stays_visible": "a satisfied watering keeps its place in the round, its plant and its amount. A task that vanished because it rained is indistinguishable from one that was never scheduled"
+      },
+      {
+        "calendar_behaviour": "satisfied tasks are cancelled in the ICS feed by their existing UID, not dropped and not duplicated"
+      }
+    ]
+  }
+}

@@ -1,0 +1,828 @@
+{
+  "offset": 0,
+  "limit": 5,
+  "endOfRecords": false,
+  "count": 7,
+  "results": [
+    {
+      "key": 5581319,
+      "nameKey": 6666020,
+      "datasetKey": "d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+      "constituentKey": "7ddf754f-d193-4cc9-b351-99906754a03b",
+      "nubKey": 5581319,
+      "parentKey": 2928728,
+      "parent": "Mandragora",
+      "kingdom": "Plantae",
+      "phylum": "Tracheophyta",
+      "order": "Solanales",
+      "family": "Solanaceae",
+      "genus": "Mandragora",
+      "species": "Mandragora turcomanica",
+      "kingdomKey": 6,
+      "phylumKey": 7707728,
+      "classKey": 220,
+      "orderKey": 1176,
+      "familyKey": 7717,
+      "genusKey": 2928728,
+      "speciesKey": 5581319,
+      "scientificName": "Mandragora turcomanica Mizg.",
+      "canonicalName": "Mandragora turcomanica",
+      "authorship": "Mizg.",
+      "publishedIn": "Mizg. (1942). In: Trans. Turkm. Acad. Nauk SSSR 2: 165.",
+      "nameType": "SCIENTIFIC",
+      "taxonomicStatus": "ACCEPTED",
+      "rank": "SPECIES",
+      "origin": "SOURCE",
+      "numDescendants": 0,
+      "numOccurrences": 0,
+      "taxonID": "gbif:5581319",
+      "extinct": false,
+      "habitats": [],
+      "nomenclaturalStatus": [],
+      "threatStatuses": [],
+      "descriptions": [],
+      "vernacularNames": [
+        {
+          "vernacularName": "Turkmenian mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "土庫曼茄參",
+          "language": "zho"
+        },
+        {
+          "vernacularName": "Мандрагора туркменская",
+          "language": "rus"
+        },
+        {
+          "vernacularName": "Turkmenian mandrake",
+          "language": "eng"
+        }
+      ],
+      "synonym": false,
+      "higherClassificationMap": {
+        "6": "Plantae",
+        "7707728": "Tracheophyta",
+        "220": "Magnoliopsida",
+        "1176": "Solanales",
+        "7717": "Solanaceae",
+        "2928728": "Mandragora"
+      },
+      "class": "Magnoliopsida"
+    },
+    {
+      "key": 5341748,
+      "nameKey": 6665981,
+      "datasetKey": "d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+      "constituentKey": "7ddf754f-d193-4cc9-b351-99906754a03b",
+      "nubKey": 5341748,
+      "parentKey": 2928728,
+      "parent": "Mandragora",
+      "kingdom": "Plantae",
+      "phylum": "Tracheophyta",
+      "order": "Solanales",
+      "family": "Solanaceae",
+      "genus": "Mandragora",
+      "species": "Mandragora officinarum",
+      "kingdomKey": 6,
+      "phylumKey": 7707728,
+      "classKey": 220,
+      "orderKey": 1176,
+      "familyKey": 7717,
+      "genusKey": 2928728,
+      "speciesKey": 5341748,
+      "scientificName": "Mandragora officinarum L.",
+      "canonicalName": "Mandragora officinarum",
+      "authorship": "L.",
+      "publishedIn": "L. (1753). In: Sp. Pl. 181.",
+      "nameType": "SCIENTIFIC",
+      "taxonomicStatus": "ACCEPTED",
+      "rank": "SPECIES",
+      "origin": "SOURCE",
+      "numDescendants": 1,
+      "numOccurrences": 0,
+      "taxonID": "gbif:5341748",
+      "extinct": false,
+      "habitats": [],
+      "nomenclaturalStatus": [],
+      "threatStatuses": [
+        "NOT_APPLICABLE"
+      ],
+      "descriptions": [
+        {
+          "description": "Lectotype (Knapp in Jarvis & al., Regnum Veg. 127: 64. 1993): Herb. Burser IX: 26 (UPS)."
+        },
+        {
+          "description": "[\" Habitat in Hispaniae, Italiae, Cretae, Cycladum apricis. \"] Sp. Pl. 1: 181 (1753). RCN: 1438."
+        },
+        {
+          "description": "Note: An illegitimate replacement name for Mandragora officinarum L. (1753)."
+        },
+        {
+          "description": "Habitat in Hispaniae, Italiae, Cretae, Cycladum apricis."
+        },
+        {
+          "description": "1. Mandragora. Hort. cliff. 51. Roy. lugdb. 423. Mat. med. 88. Mandragora fructu rotundo. Bauh. pin. 169. Mandragoras. Dod. pempt. 457."
+        },
+        {
+          "description": "Lectotype (Knapp in Jarvis & al., Regnum Veg. 127: 64. 1993): Herb. Burser IX: 26 (UPS)."
+        },
+        {
+          "description": "Generitype of Mandragora Linnaeus."
+        },
+        {
+          "description": "\" Habitat in Hispaniae, Italiae, Cretae, Cycladum apricis. \" RCN: 1438."
+        }
+      ],
+      "vernacularNames": [
+        {
+          "vernacularName": "Mediterranean mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "autumn mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "mandragore",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "mandrágora",
+          "language": "spa"
+        },
+        {
+          "vernacularName": "mandrágora",
+          "language": "por"
+        },
+        {
+          "vernacularName": "alruna",
+          "language": "swe"
+        },
+        {
+          "vernacularName": "Alraunwurzel",
+          "language": "deu"
+        },
+        {
+          "vernacularName": "毒茄參",
+          "language": "zho"
+        },
+        {
+          "vernacularName": "alruna",
+          "language": "swe"
+        },
+        {
+          "vernacularName": "mandragora lekárska",
+          "language": "slk"
+        },
+        {
+          "vernacularName": "Мандрагора лекарственная",
+          "language": "rus"
+        },
+        {
+          "vernacularName": "mandrágora",
+          "language": "por"
+        },
+        {
+          "vernacularName": "mandragora lekarska",
+          "language": "pol"
+        },
+        {
+          "vernacularName": "Мандрагора",
+          "language": "mkd"
+        },
+        {
+          "vernacularName": "マンドラゴラ",
+          "language": "jpn"
+        },
+        {
+          "vernacularName": "mandragora primaverile",
+          "language": "ita"
+        },
+        {
+          "vernacularName": "Alruun"
+        },
+        {
+          "vernacularName": "mandragore",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "Mandragore officinale",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "rohtomandrake",
+          "language": "fin"
+        },
+        {
+          "vernacularName": "mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "autumn mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Mediterranean mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Μανδραγόρας ο φαρμακευτικός",
+          "language": "ell"
+        },
+        {
+          "vernacularName": "Gemeine Alraune",
+          "language": "deu"
+        },
+        {
+          "vernacularName": "Alraunwurzel",
+          "language": "deu"
+        },
+        {
+          "vernacularName": "Alrune",
+          "language": "dan"
+        },
+        {
+          "vernacularName": "mandragora lékařská",
+          "language": "ces"
+        },
+        {
+          "vernacularName": "Echte Alraune (DE); Mandrake (EN)"
+        },
+        {
+          "vernacularName": "mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Мандрагора лікарська",
+          "language": "ukr"
+        },
+        {
+          "vernacularName": "alruna",
+          "language": "swe"
+        },
+        {
+          "vernacularName": "Echte Alraune (DE); Mandrake (EN)"
+        },
+        {
+          "vernacularName": "mandrake"
+        }
+      ],
+      "synonym": false,
+      "higherClassificationMap": {
+        "6": "Plantae",
+        "7707728": "Tracheophyta",
+        "220": "Magnoliopsida",
+        "1176": "Solanales",
+        "7717": "Solanaceae",
+        "2928728": "Mandragora"
+      },
+      "class": "Magnoliopsida"
+    },
+    {
+      "key": 7299934,
+      "nameKey": 6667561,
+      "datasetKey": "d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+      "constituentKey": "7ddf754f-d193-4cc9-b351-99906754a03b",
+      "nubKey": 7299934,
+      "parentKey": 2928728,
+      "parent": "Mandragora",
+      "kingdom": "Plantae",
+      "phylum": "Tracheophyta",
+      "order": "Solanales",
+      "family": "Solanaceae",
+      "genus": "Mandragora",
+      "species": "Mandragora caulescens",
+      "kingdomKey": 6,
+      "phylumKey": 7707728,
+      "classKey": 220,
+      "orderKey": 1176,
+      "familyKey": 7717,
+      "genusKey": 2928728,
+      "speciesKey": 7299934,
+      "scientificName": "Mandragora caulescens C.B.Clarke",
+      "canonicalName": "Mandragora caulescens",
+      "authorship": "C.B.Clarke",
+      "publishedIn": "J.D.Hooker, Fl. Brit. India 4: 242 (1883)",
+      "nameType": "SCIENTIFIC",
+      "taxonomicStatus": "ACCEPTED",
+      "rank": "SPECIES",
+      "origin": "SOURCE",
+      "numDescendants": 5,
+      "numOccurrences": 0,
+      "taxonID": "gbif:7299934",
+      "extinct": false,
+      "habitats": [],
+      "nomenclaturalStatus": [],
+      "threatStatuses": [],
+      "descriptions": [],
+      "vernacularNames": [
+        {
+          "vernacularName": "qie shen"
+        },
+        {
+          "vernacularName": "Himalayan mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "茄參",
+          "language": "zho"
+        },
+        {
+          "vernacularName": "qie shen",
+          "language": "zho"
+        },
+        {
+          "vernacularName": "Мандрагора стеблевая",
+          "language": "rus"
+        },
+        {
+          "vernacularName": "クモイヒトニナス",
+          "language": "jpn"
+        },
+        {
+          "vernacularName": "Himalayan mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "qie shen"
+        },
+        {
+          "vernacularName": "Himalayan mandrake"
+        }
+      ],
+      "synonym": false,
+      "higherClassificationMap": {
+        "6": "Plantae",
+        "7707728": "Tracheophyta",
+        "220": "Magnoliopsida",
+        "1176": "Solanales",
+        "7717": "Solanaceae",
+        "2928728": "Mandragora"
+      },
+      "class": "Magnoliopsida"
+    },
+    {
+      "key": 5341750,
+      "nameKey": 6667547,
+      "datasetKey": "d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+      "constituentKey": "7ddf754f-d193-4cc9-b351-99906754a03b",
+      "nubKey": 5341750,
+      "parentKey": 2928728,
+      "parent": "Mandragora",
+      "acceptedKey": 5341748,
+      "accepted": "Mandragora officinarum L.",
+      "kingdom": "Plantae",
+      "phylum": "Tracheophyta",
+      "order": "Solanales",
+      "family": "Solanaceae",
+      "genus": "Mandragora",
+      "species": "Mandragora officinarum",
+      "kingdomKey": 6,
+      "phylumKey": 7707728,
+      "classKey": 220,
+      "orderKey": 1176,
+      "familyKey": 7717,
+      "genusKey": 2928728,
+      "speciesKey": 5341748,
+      "scientificName": "Mandragora autumnalis Bertol.",
+      "canonicalName": "Mandragora autumnalis",
+      "authorship": "Bertol.",
+      "publishedIn": "Bertol. (1820). In: Elench. Pl. Hort. Bot. Bon. 6.",
+      "nameType": "SCIENTIFIC",
+      "taxonomicStatus": "SYNONYM",
+      "rank": "SPECIES",
+      "origin": "SOURCE",
+      "numDescendants": 0,
+      "numOccurrences": 0,
+      "taxonID": "gbif:5341750",
+      "extinct": false,
+      "habitats": [],
+      "nomenclaturalStatus": [],
+      "threatStatuses": [
+        "LEAST_CONCERN"
+      ],
+      "descriptions": [
+        {
+          "description": "Mandragora autumnalis é uma herbácea perene, acaule, de floração outonal, que habita em pousios, margens de caminhos e de campos agrícolas de sequeiro, em solo básico. A população nacional distribui-se apenas pelo Alentejo e Algarve e é constituída por nove núcleos conhecidos, isolados entre si. A maioria dos núcleos tem menos de 50 indivíduos, estimando-se que a população nacional tenha cerca de 400 indivíduos maduros conhecidos. A planta é avaliada como Em Perigo porque tem uma área de ocupação baixa (cerca de 60 km 2), está severamente fragmentada e se observa um declínio continuado da área e qualidade do habitat, que permite inferir e projetar um declínio populacional continuado. As principais pressões e ameaças são a expansão e intensificação agrícolas em larga escala, que têm resultado numa conversão rápida do seu habitat em culturas intensivas de regadio e de pomares. Estas pressões já provocaram a quase extinção de um núcleo em Cuba, havendo outro em Serpa também em risco. A expansão urbana e de empreendimentos turísticos no Algarve representa também uma ameaça grave, uma vez que os núcleos aí estão todos embebidos na malha rural e urbana, estando um deles já sujeito a um plano de urbanização concreto. Devem ser tomadas medidas para salvaguardar todos os núcleos, priorizando desde já os maiores, averiguando as suas ameaças e agindo em conformidade, por exemplo, criando área (s) protegida (s) ou sensibilizando. Considera-se a hipótese de translocação nos casos em que os núcleos se encontrem irremediavelmente ameaçados. Deve ainda ser salvaguardado o património genético e feita propagação em viveiro para eventuais reforços populacionais dos núcleos conhecidos."
+        }
+      ],
+      "vernacularNames": [
+        {
+          "vernacularName": "Pomme d’amour",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "Mandrágora",
+          "language": "spa"
+        },
+        {
+          "vernacularName": "Berenguenilla",
+          "language": "spa"
+        },
+        {
+          "vernacularName": "Love Apple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Autumn Mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Tuffah eljenn",
+          "language": "ara"
+        },
+        {
+          "vernacularName": "Tuffah el ghoula",
+          "language": "ara"
+        },
+        {
+          "vernacularName": "Taryala",
+          "language": "ara"
+        },
+        {
+          "vernacularName": "Beid el-ghoul",
+          "language": "ara"
+        },
+        {
+          "vernacularName": "MANDRÁGORA",
+          "language": "por"
+        },
+        {
+          "vernacularName": "mandrake",
+          "language": "eng"
+        }
+      ],
+      "synonym": true,
+      "higherClassificationMap": {
+        "6": "Plantae",
+        "7707728": "Tracheophyta",
+        "220": "Magnoliopsida",
+        "1176": "Solanales",
+        "7717": "Solanaceae",
+        "2928728": "Mandragora",
+        "5341748": "Mandragora officinarum"
+      },
+      "class": "Magnoliopsida"
+    },
+    {
+      "key": 3033839,
+      "nameKey": 8969990,
+      "datasetKey": "d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+      "constituentKey": "7ddf754f-d193-4cc9-b351-99906754a03b",
+      "nubKey": 3033839,
+      "parentKey": 3033838,
+      "parent": "Podophyllum",
+      "kingdom": "Plantae",
+      "phylum": "Tracheophyta",
+      "order": "Ranunculales",
+      "family": "Berberidaceae",
+      "genus": "Podophyllum",
+      "species": "Podophyllum peltatum",
+      "kingdomKey": 6,
+      "phylumKey": 7707728,
+      "classKey": 220,
+      "orderKey": 399,
+      "familyKey": 6673,
+      "genusKey": 3033838,
+      "speciesKey": 3033839,
+      "scientificName": "Podophyllum peltatum L.",
+      "canonicalName": "Podophyllum peltatum",
+      "authorship": "L.",
+      "publishedIn": "L. (1753). In: Sp. Pl. 505.",
+      "nameType": "SCIENTIFIC",
+      "taxonomicStatus": "ACCEPTED",
+      "rank": "SPECIES",
+      "origin": "SOURCE",
+      "numDescendants": 1,
+      "numOccurrences": 0,
+      "taxonID": "gbif:3033839",
+      "extinct": false,
+      "habitats": [
+        "TERRESTRIAL",
+        "TERRESTRIAL"
+      ],
+      "nomenclaturalStatus": [],
+      "threatStatuses": [
+        "LEAST_CONCERN"
+      ],
+      "descriptions": [
+        {
+          "description": "herb"
+        },
+        {
+          "description": "Northern America"
+        },
+        {
+          "description": "Habitat in America septentrionali. ♃"
+        },
+        {
+          "description": "1. Podophyllum foliis peltatis lobatis. Podophyllum. Hort. cliff. 202. Hort. ups. 137. Gron. virg. 57. Roy. lugdb. 480. Anapodophyllum canadense. Catesb. car. 1. p. 24. t. 24. Aconitifolia humilis, flore albo unico campanulato, fructu cynosbati. Mentz. pug. t. 11."
+        },
+        {
+          "description": "Lectotype (Reveal in Jarvis & al., Regnum Veg. 127: 77. 1993): Herb. Linn. No. 667.1 (LINN)."
+        },
+        {
+          "description": "Generitype of Podophyllum Linnaeus (vide Green, Prop. Brit. Bot.: 160. 1929)."
+        },
+        {
+          "description": "\" Habitat in America septentrionali. \" RCN: 3833."
+        },
+        {
+          "description": "Northern America (WGSRPD:7)"
+        }
+      ],
+      "vernacularNames": [
+        {
+          "vernacularName": "Wild Mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Pomme De Mai",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Mayapple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "May Apple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Indian-apple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "American-mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Mayapple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Podophylle Pelté",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "wild mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "pomme de mai",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "podophylle pelté",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "May-apple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Indian-apple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "gewöhnlicher Maiapfel",
+          "language": "deu"
+        },
+        {
+          "vernacularName": "amerikanskt fotblad",
+          "language": "swe"
+        },
+        {
+          "vernacularName": "wild mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "American-mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Entenfuß",
+          "language": "deu"
+        },
+        {
+          "vernacularName": "podophylle pelté",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "podofill amerikanskij"
+        },
+        {
+          "vernacularName": "podofill š&ccaron;itovidnyj"
+        },
+        {
+          "vernacularName": "pomme de mai",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "mayapple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "足叶草",
+          "language": "zho"
+        },
+        {
+          "vernacularName": "北美鬼臼",
+          "language": "zho"
+        },
+        {
+          "vernacularName": "北美桃儿七",
+          "language": "zho"
+        },
+        {
+          "vernacularName": "Podopil",
+          "language": "tgl"
+        },
+        {
+          "vernacularName": "amerikanskt fotblad",
+          "language": "swe"
+        },
+        {
+          "vernacularName": "Podofilo",
+          "language": "spa"
+        },
+        {
+          "vernacularName": "Ipecacuana de la Carolina",
+          "language": "spa"
+        },
+        {
+          "vernacularName": "noholist štítovitý",
+          "language": "slk"
+        },
+        {
+          "vernacularName": "Подофилл щитовидный",
+          "language": "rus"
+        },
+        {
+          "vernacularName": "podofill ščitovidnyj",
+          "language": "rus"
+        },
+        {
+          "vernacularName": "podofill amerikanskij",
+          "language": "rus"
+        },
+        {
+          "vernacularName": "Stopkowiec tarczowaty",
+          "language": "pol"
+        },
+        {
+          "vernacularName": "Inini Wijiibik (Bookade`imin)",
+          "language": "oji"
+        },
+        {
+          "vernacularName": "लघुपत्र",
+          "language": "nep"
+        },
+        {
+          "vernacularName": "’kvpotoyv"
+        },
+        {
+          "vernacularName": "kupo"
+        },
+        {
+          "vernacularName": "alulhùkwës"
+        },
+        {
+          "vernacularName": "ポドフィルム",
+          "language": "jpn"
+        },
+        {
+          "vernacularName": "アメリカミヤオソウ",
+          "language": "jpn"
+        },
+        {
+          "vernacularName": "pomme de mai",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "podophylle pelté",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "amerikanjalkalehti",
+          "language": "fin"
+        },
+        {
+          "vernacularName": "kilpjas jalgleht",
+          "language": "est"
+        },
+        {
+          "vernacularName": "wild mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Mayapple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "May-apple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Indian-apple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "American-mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "American Mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "gewöhnlicher Maiapfel",
+          "language": "deu"
+        },
+        {
+          "vernacularName": "Schildförmiges Fußblatt",
+          "language": "deu"
+        },
+        {
+          "vernacularName": "Entenfuß",
+          "language": "deu"
+        },
+        {
+          "vernacularName": "Prærie fodblad",
+          "language": "dan"
+        },
+        {
+          "vernacularName": "ᎤᏂᏍᏇᏚᎦ"
+        },
+        {
+          "vernacularName": "noholist štítnatý",
+          "language": "ces"
+        },
+        {
+          "vernacularName": "Podofil",
+          "language": "cat"
+        },
+        {
+          "vernacularName": "Qalxanabənzər podofil",
+          "language": "aze"
+        },
+        {
+          "vernacularName": "تفاح مايو",
+          "language": "ara"
+        },
+        {
+          "vernacularName": "Nordamerikanischer Maiapfel (DE)"
+        },
+        {
+          "vernacularName": "Mayapple (EN)"
+        },
+        {
+          "vernacularName": "wild-mandrake",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "pomme de mai",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "podophylle pelté",
+          "language": "fra"
+        },
+        {
+          "vernacularName": "mayapple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "May apple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Indian-apple",
+          "language": "eng"
+        },
+        {
+          "vernacularName": "Nordamerikanischer Maiapfel (DE)"
+        },
+        {
+          "vernacularName": "Mayapple (EN)"
+        }
+      ],
+      "synonym": false,
+      "higherClassificationMap": {
+        "6": "Plantae",
+        "7707728": "Tracheophyta",
+        "220": "Magnoliopsida",
+        "399": "Ranunculales",
+        "6673": "Berberidaceae",
+        "3033838": "Podophyllum"
+      },
+      "class": "Magnoliopsida"
+    }
+  ],
+  "facets": []
+}

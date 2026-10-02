@@ -1,0 +1,106 @@
+[
+  {
+    "id": "01890020-0000-7000-8000-000000000001",
+    "kind": "powo",
+    "title": "Plants of the World Online \u2014 Monstera deliciosa",
+    "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:87458-1",
+    "license": "CC BY 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890020-0000-7000-8000-000000000002",
+    "kind": "gbif",
+    "title": "GBIF Backbone Taxonomy",
+    "url": "https://www.gbif.org/species/2872082",
+    "license": "CC BY 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890020-0000-7000-8000-000000000003",
+    "kind": "wikipedia",
+    "title": "Wikipedia \u2014 Monstera deliciosa",
+    "url": "https://en.wikipedia.org/wiki/Monstera_deliciosa",
+    "license": "CC BY-SA 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890020-0000-7000-8000-000000000004",
+    "kind": "usda",
+    "title": "USDA PLANTS Database",
+    "url": "https://plants.usda.gov/",
+    "license": "Public domain",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890020-0000-7000-8000-000000000005",
+    "kind": "wikidata",
+    "title": "Wikidata",
+    "url": "https://www.wikidata.org/",
+    "license": "CC0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890020-0000-7000-8000-000000000006",
+    "kind": "perenual",
+    "title": "Perenual plant care API",
+    "url": "https://perenual.com/docs/api",
+    "license": "Perenual terms",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890021-0000-7000-8000-000000000010",
+    "kind": "wikipedia",
+    "title": "Wikipedia \u2014 Lavandula angustifolia",
+    "url": "https://en.wikipedia.org/wiki/Lavandula_angustifolia",
+    "license": "CC BY-SA 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890021-0000-7000-8000-000000000011",
+    "kind": "wikipedia",
+    "title": "Wikipedia \u2014 Citrus \u00d7 limon",
+    "url": "https://en.wikipedia.org/wiki/Citrus_\u00d7_limon",
+    "license": "CC BY-SA 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890021-0000-7000-8000-000000000012",
+    "kind": "wikipedia",
+    "title": "Wikipedia \u2014 Hosta sieboldiana",
+    "url": "https://en.wikipedia.org/wiki/Hosta_sieboldiana",
+    "license": "CC BY-SA 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890021-0000-7000-8000-000000000013",
+    "kind": "wikipedia",
+    "title": "Wikipedia \u2014 Ocimum basilicum",
+    "url": "https://en.wikipedia.org/wiki/Ocimum_basilicum",
+    "license": "CC BY-SA 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890021-0000-7000-8000-000000000014",
+    "kind": "wikipedia",
+    "title": "Wikipedia \u2014 Rosa gallica",
+    "url": "https://en.wikipedia.org/wiki/Rosa_gallica",
+    "license": "CC BY-SA 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890021-0000-7000-8000-000000000015",
+    "kind": "wikipedia",
+    "title": "Wikipedia \u2014 Mandragora officinarum",
+    "url": "https://en.wikipedia.org/wiki/Mandragora_officinarum",
+    "license": "CC BY-SA 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  },
+  {
+    "id": "01890021-0000-7000-8000-000000000016",
+    "kind": "wikipedia",
+    "title": "Wikipedia \u2014 Sansevieria trifasciata",
+    "url": "https://en.wikipedia.org/wiki/Sansevieria_trifasciata",
+    "license": "CC BY-SA 4.0",
+    "retrieved_at": "2026-09-15T12:00:00Z"
+  }
+]

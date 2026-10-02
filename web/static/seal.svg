@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The Ministry seal — original vector work, the design system, an earlier release.
+
+  Drawn, *Seals and crests*, and the original-theme rule. What it is made of: a
+  hanging lantern, a laurel sprig either side, four-pointed stars, a thin rule
+  with a lozenge, two concentric rings, and a circular inscription in the app's
+  own words. Every one of those is a motif the design lists as permitted, and each
+  is centuries older than any film.
+
+  What it deliberately is not: a shield or a crest of any shape; a quartered
+  field; a monogram, initial or letter-in-a-circle device; an animal; a crossed
+  pair of anything; a Latin motto, or an English one composed to sound like a
+  school's. The inscription is the app's name and three plain English verbs for
+  what the app does — tend the plants, record the work, remember what was
+  learned. The lettering is a generic system serif stack, never a film face.
+
+  The test the design sets is that a reader should think "an old botanical
+  institution", never "that's from —". A lantern and a laurel sprig on a green
+  ground is an apothecary's or a horticultural society's mark; nothing here
+  quotes a specific one. A reviews the mark.
+
+  Colours: Antique Gold #B89A5A linework on Forest Green #19382F is 4.74:1,
+  which clears AA for the inscription as text as well as the 3:1 non-text
+  threshold for the rings. The flame is Warm Ivory #F4EDDA at 10.91:1.
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 120 120"
+  width="120"
+  height="120"
+  role="img"
+  aria-labelledby="moh-seal-title moh-seal-desc"
+>
+  <title id="moh-seal-title">The Ministry of Herbology</title>
+  <desc id="moh-seal-desc">
+    A lantern between two laurel sprigs, under three stars, inside a ring
+    inscribed “The Ministry of Herbology — tend, record, remember”.
+  </desc>
+
+  <defs>
+    <path id="moh-seal-arc-top" d="M 60 60 m -52.4 0 a 52.4 52.4 0 0 1 104.8 0" />
+    <path id="moh-seal-arc-bottom" d="M 9.6 60 A 50.4 50.4 0 0 0 110.4 60" />
+
+    <!-- One sprig, drawn once and mirrored. Heraldic symmetry is permitted;
+         a recognisable heraldic arrangement is not. -->
+    <g id="moh-seal-sprig" fill="none" stroke="#b89a5a" stroke-width="1.4" stroke-linecap="round">
+      <path d="M52.5 77.5 C44 74 38.4 66.6 36.4 57.2" />
+      <path
+        d="M0 0 C2.6 -3 7.2 -2.8 9.6 0 C7.2 2.8 2.6 3 0 0 Z"
+        transform="translate(47.4 74.6) rotate(200)"
+        stroke-width="1.1"
+      />
+      <path
+        d="M0 0 C2.6 -3 7.2 -2.8 9.6 0 C7.2 2.8 2.6 3 0 0 Z"
+        transform="translate(42.6 70.2) rotate(214)"
+        stroke-width="1.1"
+      />
+      <path
+        d="M0 0 C2.6 -3 7.2 -2.8 9.6 0 C7.2 2.8 2.6 3 0 0 Z"
+        transform="translate(39 64.4) rotate(230)"
+        stroke-width="1.1"
+      />
+      <path
+        d="M0 0 C2.6 -3 7.2 -2.8 9.6 0 C7.2 2.8 2.6 3 0 0 Z"
+        transform="translate(36.8 57.6) rotate(248)"
+        stroke-width="1.1"
+      />
+    </g>
+
+    <!-- A four-pointed star: two crossed spindles, no five- or seven-pointed
+         star and no burst. -->
+    <path id="moh-seal-star" d="M0 -4.6 L1.1 -1.1 L4.6 0 L1.1 1.1 L0 4.6 L-1.1 1.1 L-4.6 0 L-1.1 -1.1 Z" />
+  </defs>
+
+  <!-- ground -->
+  <circle cx="60" cy="60" r="59" fill="#19382f" />
+
+  <!-- the double border of §6: outer line, inner line slightly thinner -->
+  <circle cx="60" cy="60" r="56.6" fill="none" stroke="#b89a5a" stroke-width="1.6" />
+  <circle cx="60" cy="60" r="47.4" fill="none" stroke="#b89a5a" stroke-width="0.8" />
+
+  <!-- the circular inscription, in the app's own words -->
+  <g
+    fill="#b89a5a"
+    font-family="Georgia, 'Iowan Old Style', 'Times New Roman', serif"
+    font-size="6.6"
+    letter-spacing="0.9"
+  >
+    <text text-anchor="middle">
+      <textPath href="#moh-seal-arc-top" startOffset="50%">MINISTRY OF HERBOLOGY</textPath>
+    </text>
+    <text text-anchor="middle" font-size="5.4" letter-spacing="1">
+      <textPath href="#moh-seal-arc-bottom" startOffset="50%">TEND · RECORD · REMEMBER</textPath>
+    </text>
+  </g>
+
+  <!-- stars over the lantern -->
+  <g fill="#b89a5a">
+    <use href="#moh-seal-star" transform="translate(60 21.5)" />
+    <use href="#moh-seal-star" transform="translate(44.5 26.5) scale(0.55)" />
+    <use href="#moh-seal-star" transform="translate(75.5 26.5) scale(0.55)" />
+  </g>
+
+  <!-- the lantern: a ring, a cap, a glazed housing, a flame, a plinth -->
+  <g fill="none" stroke="#b89a5a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="60" cy="32.6" r="2.9" />
+    <path d="M60 35.5 v3.2" />
+    <path d="M53.6 43.2 L66.4 43.2 L70.8 48.4 L49.2 48.4 Z" />
+    <path d="M51.4 50.6 L68.6 50.6" stroke-width="1.2" />
+    <path d="M52.6 50.6 v18.2 a5 5 0 0 0 5 5 h4.8 a5 5 0 0 0 5 -5 v-18.2" />
+    <path d="M57.6 51.4 v19.6 M62.4 51.4 v19.6" stroke-width="0.8" />
+    <path d="M53.6 76.6 L66.4 76.6" stroke-width="1.6" />
+    <path d="M55.8 79.4 L64.2 79.4" stroke-width="1.2" />
+  </g>
+  <path
+    d="M60 56.6 C62.8 60.4 63.6 63 61.9 64.9 C60.8 66.2 59.2 66.2 58.1 64.9 C56.4 63 57.2 60.4 60 56.6 Z"
+    fill="#f4edda"
+  />
+
+  <!-- laurel, mirrored -->
+  <use href="#moh-seal-sprig" />
+  <use href="#moh-seal-sprig" transform="translate(120 0) scale(-1 1)" />
+
+  <!-- the rule and lozenge of §7's ornamental divider -->
+  <g fill="#b89a5a" stroke="#b89a5a">
+    <path d="M42 86.4 L54.8 86.4 M65.2 86.4 L78 86.4" stroke-width="1.1" stroke-linecap="round" />
+    <path d="M60 83.4 L62.6 86.4 L60 89.4 L57.4 86.4 Z" stroke-width="0.6" />
+  </g>
+</svg>

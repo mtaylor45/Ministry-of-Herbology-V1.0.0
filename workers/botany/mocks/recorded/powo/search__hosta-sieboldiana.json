@@ -1,0 +1,25 @@
+{
+  "_provenance": {
+    "note": "Stand-in for a POWO API 2 search response. The envelope follows the documented /api/2/search shape; every name, author, family and IPNI LSID in it was read from a live call to https://www.ipni.org/api/1/search on 2026-09-20. Nothing here is a guess. See PROVENANCE.md.",
+    "shape": "https://powo.science.kew.org/api/2/search",
+    "content_source": "https://www.ipni.org/api/1/search",
+    "recorded_on": "2026-09-20"
+  },
+  "totalResults": 1,
+  "page": 1,
+  "perPage": 10,
+  "totalPages": 1,
+  "results": [
+    {
+      "accepted": true,
+      "author": "Engl.",
+      "kingdom": "Plantae",
+      "family": "Hostaceae",
+      "genus": "Hosta",
+      "name": "Hosta sieboldiana",
+      "rank": "Species",
+      "url": "/taxon/urn:lsid:ipni.org:names:536637-1",
+      "fqId": "urn:lsid:ipni.org:names:536637-1"
+    }
+  ]
+}

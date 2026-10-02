@@ -1,0 +1,552 @@
+# CI. The deployment owns this file.
+#
+# The contract job runs first and fast: if the frozen contract is broken, every
+# other job's result is noise.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '22'
+  # The ruff this workflow runs. Pinned here AND in api/pyproject.toml, and
+  # the API job fails by name if the two disagree or if the installed ruff is
+  # neither. The dev group said `ruff>=0.7`, so CI ran whatever
+  # ruff had shipped that morning: 0.16 changed the default rule set, a
+  # parts of the project on 0.15 saw none of it locally, and three CI rounds went on
+  # findings `make lint` could not reproduce. Bump both pins in one change.
+  RUFF_VERSION: '0.16.9'
+
+jobs:
+  contract:
+    name: Contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install
+        run: pip install -e './api[dev]'
+      - name: Contract and schema tests
+        run: pytest tests/contract -q
+      - name: The workflow itself is one GitHub will run
+        # A workflow GitHub refuses runs no jobs, and reports nothing on the
+        # PR that introduced it: #72 merged a job-level `env` that read the
+        # runner context, and every push to main after it ran zero jobs. This
+        # fails the PR instead. Pinned, like ruff, so it cannot change under
+        # us (api/pyproject.toml); shellcheck and pyflakes are left out
+        # because their versions come from the runner image, which is not.
+        # `make contract` runs this same line.
+        run: actionlint -shellcheck= -pyflakes= .github/workflows/ci.yml
+
+  api:
+    name: API and engines
+    runs-on: ubuntu-latest
+    needs: contract
+    # A real Postgres, so the live-repository suites run instead of skipping.
+    # Nothing in CI ever opened a connection to one: The scheduler's
+    # #67 found three faults in its live path that no test could see, because
+    # the only tests that could see them were skipped on every run. Same
+    # image as both stacks, so a Timescale-specific statement fails here too.
+    #
+    # No password, not even a throwaway one: trust authentication, on a
+    # container that lives for this job and listens only on the runner.
+    services:
+      postgres:
+        image: timescale/timescaledb:2.17.2-pg16
+        env:
+          POSTGRES_USER: herbology
+          POSTGRES_DB: herbology_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U herbology -d herbology_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      MOH_TEST_DATABASE_URL: postgresql+asyncpg://herbology@127.0.0.1:5432/herbology_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install
+        run: pip install -e './api[dev]'
+      - name: The ruff that runs is the ruff that is pinned
+        run: |
+          pinned=$(sed -n 's/^ *"ruff==\([^"]*\)".*/\1/p' api/pyproject.toml)
+          installed=$(ruff --version | sed 's/^ruff //')
+          echo "workflow RUFF_VERSION=$RUFF_VERSION  pyproject=$pinned  installed=$installed"
+          if [ -z "$pinned" ]; then
+            echo "api/pyproject.toml no longer pins ruff with ==; it must (see RUFF_VERSION above)."; exit 1
+          fi
+          if [ "$pinned" != "$RUFF_VERSION" ]; then
+            echo "api/pyproject.toml pins ruff==$pinned but this workflow says $RUFF_VERSION."
+            echo "Change both in the same commit; a parts of the project's make lint runs the pyproject one."; exit 1
+          fi
+          if [ "$installed" != "$RUFF_VERSION" ]; then
+            echo "ruff $installed is installed; expected $RUFF_VERSION. Something installed a second ruff."; exit 1
+          fi
+      - name: Lint
+        # `make lint` runs these same two lines. Change both or neither.
+        run: |
+          ruff check api workers tests scripts
+          black --check api workers tests scripts
+      - name: Types
+        # Required: all three trees are clean under the pinned mypy,
+        # with types-PyYAML installed.
+        # `make types` runs this same line. Change both or neither.
+        run: mypy api/app workers api/inventory
+      - name: Types, advisory (api/tending)
+        # One error, in the scheduler's test_tending_push.py:110 (int() of an
+        # icalendar property). Advisory until G fixes it, then it joins the
+        # line above; listed in the earlier PR so it is routed rather than lost.
+        continue-on-error: true
+        run: mypy api/tending
+      - name: The MQTT transport is installed
+        # aiomqtt is a runtime dependency. False here means the Office would say "unconfigured" on every
+        # deployment of this build.
+        run: python -c "from workers.hub.mqtt import transport_available as t; assert t(), 'aiomqtt is not importable'"
+      - name: Tests
+        # tests/ is the test suite's suite; api/ and workers/ hold each parts of the project's own
+        # tests, which the ownership rule requires them to keep inside their directory.
+        # Collecting only tests/ meant those never ran in CI at all.
+        #
+        # -rs lists every skip, and the live-database suites must not be
+        # among them: a skip there is exactly how their faults stayed
+        # invisible so a skip that names the variable fails the job.
+        shell: bash
+        run: |
+          set -o pipefail
+          pytest tests api workers scripts -q -rs | tee "$RUNNER_TEMP/pytest.txt"
+          if grep -q 'set MOH_TEST_DATABASE_URL' "$RUNNER_TEMP/pytest.txt"; then
+            echo "A live-database suite skipped although MOH_TEST_DATABASE_URL is set."; exit 1
+          fi
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    needs: contract
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        run: npm ci || npm install
+      - name: Sync SvelteKit
+        run: npx svelte-kit sync
+      - name: Lint and typecheck
+        run: npm run lint
+      - name: Unit tests, including the WCAG AA token checks
+        run: npm run test
+      - name: Build
+        run: npm run build
+
+  a11y:
+    name: Accessibility
+    runs-on: ubuntu-latest
+    needs: contract
+    # The design system's WCAG AA audit (web/src/lib/ui/a11y/README.md), the definition of done
+    # "the UI meets WCAG AA" checked rather than asserted. It needs the mock API,
+    # a production build and a browser at once; scripts/a11y.sh provides all
+    # three, and `make a11y` runs the same script, so a local run and this job
+    # cannot disagree about how the audit is started.
+    #
+    # The browser is the runner's own preinstalled Chrome, found by the script.
+    # No Playwright download: the project conventions says never run `playwright install`, and
+    # a job that fetches a browser on every run is a job that fails when the
+    # CDN does. If a runner image ever drops Chrome, the script fails by name.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install the API
+        run: pip install -e './api[dev]'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install the web app
+        working-directory: web
+        run: npm ci || npm install
+      - name: WCAG AA audit, every route, both themes, two viewports
+        env:
+          MOH_PYTHON: python
+          MOH_A11Y_REPORT: ${{ runner.temp }}/a11y.md
+        run: scripts/a11y.sh
+      - name: The audit's tables, on the run's summary page
+        if: always()
+        env:
+          REPORT: ${{ runner.temp }}/a11y.md
+        run: |
+          if [ -f "$REPORT" ]; then cat "$REPORT" >> "$GITHUB_STEP_SUMMARY"; fi
+
+  images:
+    name: Build images
+    runs-on: ubuntu-latest
+    needs: [api, web]
+    # Runs on pull requests too. Gated to main, this job stayed red from the earlier
+    # merge onwards without anyone seeing it: a check that only reports after a
+    # merge cannot stop a broken image landing.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/api.Dockerfile
+          push: false
+          load: true
+          tags: herbology/api:${{ github.sha }}
+      - name: Build web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/web.Dockerfile
+          push: false
+          tags: herbology/web:${{ github.sha }}
+      # The worker image was not built here until now, which meant a change to
+      # its Dockerfile — or to the entrypoint both it and the API copy in —
+      # could only be found by deploying.
+      - name: Build worker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/worker.Dockerfile
+          push: false
+          load: true
+          tags: herbology/worker:${{ github.sha }}
+      # The image is what a deployment runs, so the transport is checked in
+      # the image as well as in the API job's virtualenv: a dependency that
+      # installs in one and not the other is the difference this catches.
+      - name: The MQTT transport is available in the built images
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          for image in api worker; do
+            docker run --rm --entrypoint python "herbology/$image:$SHA" -c \
+              "from workers.hub.mqtt import transport_available as t; assert t(); print('$image: transport_available() is True')"
+          done
+      # No push, and no registry credentials anywhere in this workflow. Under
+      # the design the project operates no registry: this job exists to keep the
+      # Dockerfiles honest, and an operator pushes to their own with
+      # `make push MOH_REGISTRY=...`.
+
+  stack:
+    name: Deployment stack
+    runs-on: ubuntu-latest
+    needs: contract
+    steps:
+      - uses: actions/checkout@v4
+      - name: The stack file renders with every required variable supplied
+        env:
+          # Documentation-reserved names. Nothing here is reachable, and
+          # nothing here is a credential — the six secrets are swarm secrets
+          # the operator creates, and the stack refers to them by name only.
+          MOH_REGISTRY: registry.example.net/ministry-of-herbology
+          MOH_IMAGE_TAG: ci-${{ github.sha }}
+          MOH_PUBLIC_BASE_URL: https://herbology.example.net
+          MOH_NWS_USER_AGENT: ministry-of-herbology (ci@example.net)
+        run: docker compose -f infra/stack/docker-stack.yml config >/dev/null
+      - name: And fails, by name, without each of them
+        run: |
+          set -u
+          for missing in MOH_REGISTRY MOH_IMAGE_TAG MOH_PUBLIC_BASE_URL MOH_NWS_USER_AGENT; do
+            # A command substitution is already a subshell, so the exports go
+            # no further than this iteration. MOH_NWS_USER_AGENT contains a
+            # space and parentheses, which is exactly the shape that catches
+            # people out, so it is quoted rather than word-split.
+            output=$(
+              export MOH_REGISTRY=registry.example.net/moh
+              export MOH_IMAGE_TAG=ci
+              export MOH_PUBLIC_BASE_URL=https://example.net
+              export MOH_NWS_USER_AGENT="moh (ci@example.net)"
+              unset "$missing"
+              docker compose -f infra/stack/docker-stack.yml config 2>&1 >/dev/null
+            ) || true
+            case "$output" in
+              *"$missing"*) echo "ok: $missing is required and named" ;;
+              *) echo "$missing did not fail by name. Got: $output"; exit 1 ;;
+            esac
+          done
+      - name: The nginx configuration is valid
+        run: |
+          # A throwaway certificate, generated here and never leaving the
+          # runner, only so that nginx -t can read the ssl_certificate lines.
+          # The operator supplies the real one; see docs/deploy/README.md.
+          mkdir -p /tmp/moh-tls
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -keyout /tmp/moh-tls/key.pem -out /tmp/moh-tls/cert.pem \
+            -subj '/CN=ci.example.net' 2>/dev/null
+          docker run --rm \
+            -v "$PWD/infra/stack/nginx/nginx.conf:/etc/nginx/nginx.conf:ro" \
+            -v "$PWD/infra/stack/nginx/moh-proxy.conf:/etc/nginx/moh-proxy.conf:ro" \
+            -v /tmp/moh-tls/cert.pem:/run/secrets/moh_tls_cert:ro \
+            -v /tmp/moh-tls/key.pem:/run/secrets/moh_tls_key:ro \
+            nginx:1.27-alpine nginx -t
+      - name: The shell scripts parse
+        run: |
+          for script in scripts/*.sh scripts/lib/*.sh scripts/ci/*.sh infra/docker/entrypoint.sh; do
+            sh -n "$script" || exit 1
+          done
+          echo "all shell scripts parse"
+
+  clean-machine:
+    name: Clean machine — bring-up, restore drill, performance
+    runs-on: ubuntu-latest
+    needs: contract
+    # there is no project-operated deployment, so "v1.0 deployed"
+    # means the tagged commit comes up from docs/deploy/ on a clean machine and
+    # a restore from backup succeeds on it. This runner is that machine.
+    #
+    # Every step below is a section of docs/deploy/README.md, run as the guide
+    # writes it: a stranger's commands, not a private script. Where the job
+    # and the guide disagreed, the guide was changed. The one exception
+    # is scripts/drill.py, which does what a person would do in the browser:
+    # add a plant, a photograph and a completed task before the backup, and
+    # check all three after the restore.
+    #
+    # Secrets are generated here, at run time, by the guide's own commands;
+    # none is echoed, the one that passes through a shell variable is masked,
+    # and all of them are destroyed with the runner.
+    timeout-minutes: 45
+    env:
+      MOH_STACK: moh
+      MOH_REGISTRY: local/moh
+      # The guide's default is ten minutes; a healthy stack converges here in
+      # about two, so five is a hang, said by name rather than at the job's
+      # 45-minute timeout.
+      MOH_DEPLOY_TIMEOUT: '300'
+    steps:
+      # Job-level `env` cannot read the runner context, so the two paths
+      # under the runner's temporary directory are set here instead. Written
+      # as `${{ runner.temp }}` above, they made GitHub reject the whole
+      # workflow, and main ran no jobs at all (run 36991333326).
+      - name: Paths under the runner's temporary directory
+        run: |
+          echo "MOH_DRILL_CACERT=$RUNNER_TEMP/tls/fullchain.pem" >> "$GITHUB_ENV"
+          echo "DRILL_STATE=$RUNNER_TEMP/drill.json" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: §2 Prerequisites
+        run: |
+          docker version
+          docker info | grep -i 'server version'
+
+      - name: §3 Build your images (one machine, no registry)
+        run: |
+          make images MOH_REGISTRY="$MOH_REGISTRY"
+          echo "MOH_IMAGE_TAG=$(git describe --tags --always --dirty)" >> "$GITHUB_ENV"
+
+      - name: §4 Initialise a swarm
+        run: |
+          # The guide: 127.0.0.1 is right for a single node nothing will join.
+          docker swarm init --advertise-addr 127.0.0.1
+
+      - name: §5 Certificates (self-signed, for this runner only)
+        working-directory: ${{ runner.temp }}
+        run: |
+          mkdir -p tls && cd tls
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -keyout privkey.pem -out fullchain.pem \
+            -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost' 2>/dev/null
+          # The guide's three checks, verbatim.
+          openssl x509 -in fullchain.pem -noout -subject -dates
+          a=$(openssl x509 -in fullchain.pem -noout -modulus | openssl sha256)
+          b=$(openssl rsa  -in privkey.pem   -noout -modulus | openssl sha256)
+          test "$a" = "$b" && echo "certificate and key match"
+
+      - name: §6 Create the secrets
+        run: |
+          openssl rand -base64 39 | tr -d '\n' | docker secret create moh_db_password -
+
+          # The guide's MQTT block, as one shell session.
+          MQTT_USER=herbology
+          MQTT_PASSWORD=$(openssl rand -base64 30 | tr -d '\n')
+          echo "::add-mask::$MQTT_PASSWORD"
+          printf '%s' "$MQTT_PASSWORD" | docker secret create moh_mqtt_password -
+          docker run --rm -i eclipse-mosquitto:2.0.20 \
+            sh -c "mosquitto_passwd -c -b /tmp/pw '$MQTT_USER' '$MQTT_PASSWORD' >/dev/null && cat /tmp/pw" \
+            | docker secret create moh_mqtt_passwords -
+          unset MQTT_PASSWORD
+
+          # No Home Assistant here.
+          printf '\n' | docker secret create moh_ha_token -
+
+          docker secret create moh_tls_cert "$RUNNER_TEMP/tls/fullchain.pem"
+          docker secret create moh_tls_key  "$RUNNER_TEMP/tls/privkey.pem"
+
+          docker secret ls --format '{{.Name}}'
+
+      - name: §11 Calendar push — one feed's secret, carried across a deploy
+        run: |
+          # A throwaway credential for a feed that does not exist, on a host
+          # that cannot resolve (.invalid, RFC 6761). It proves that
+          # `make stack-deploy` keeps a moh_caldav_ secret on the API; nothing
+          # ever pushes to it.
+          FEED=00000000-0000-7000-8000-00000000c1d0
+          printf '%s\n%s\n%s\n' "https://caldav.example.invalid/calendars/drill/" drill \
+            "$(openssl rand -base64 24)" | docker secret create "moh_caldav_$FEED" -
+          echo "CALDAV_SECRET=moh_caldav_$FEED" >> "$GITHUB_ENV"
+
+      - name: §7 Write your .env.deploy
+        run: |
+          cat > .env.deploy <<ENV
+          MOH_REGISTRY=$MOH_REGISTRY
+          MOH_IMAGE_TAG=$MOH_IMAGE_TAG
+          MOH_PUBLIC_BASE_URL=https://localhost
+          MOH_NWS_USER_AGENT=ministry-of-herbology (ci@example.net)
+          MOH_MQTT_USERNAME=herbology
+          ENV
+          make stack-config >/dev/null && echo "stack renders"
+
+      - name: §8 Deploy
+        run: |
+          make stack-deploy MOH_RESOLVE_IMAGE=never
+          make stack-ps
+          scripts/ci/wait_healthy.sh
+
+      - name: The calendar-push secret reached the API through the deploy
+        run: |
+          docker service inspect moh_api \
+            --format '{{range .Spec.TaskTemplate.ContainerSpec.Secrets}}{{.SecretName}}{{"\n"}}{{end}}' \
+            | grep -qx "$CALDAV_SECRET" && echo "$CALDAV_SECRET is on moh_api"
+
+      - name: §9 First run — the schema
+        run: |
+          scripts/migrate.sh status
+          scripts/migrate.sh apply
+          scripts/migrate.sh status
+
+      - name: §10 Fixtures (this database is thrown away)
+        run: |
+          python3 scripts/load_fixtures.py --sql \
+            | docker exec -i $(docker ps -qf name=moh_db) psql -q -v ON_ERROR_STOP=1 -U herbology -d herbology
+
+      - name: Write known data — a specimen, its photograph, a completed task
+        run: python3 scripts/drill.py write --state "$DRILL_STATE"
+
+      - name: Performance pass, live mode, real Postgres
+        run: |
+          python3 scripts/drill.py measure --out "$RUNNER_TEMP/perf.md"
+          {
+            echo "### Performance, clean machine, live mode"
+            echo
+            echo "Fixture household, through Nginx over TLS, on a GitHub runner."
+            echo
+            cat "$RUNNER_TEMP/perf.md"
+          } >> "$GITHUB_STEP_SUMMARY"
+          scripts/ci/first_load.sh >> "$GITHUB_STEP_SUMMARY"
+
+      - name: §13 Taking a backup
+        run: |
+          make backup
+          ls -l backups/
+          # The files this backup wrote, by name: the dump and the archives
+          # are stamped separately and can differ by a second.
+          {
+            echo "DRILL_DUMP=$(ls backups/moh-herbology-*.dump)"
+            for volume in plates-images grounds-images photos-images; do
+              echo "DRILL_ARCHIVE_${volume%-images}=$(ls backups/moh_$volume-*.tar.gz)"
+            done
+          } >> "$GITHUB_ENV"
+
+      - name: Destroy the database and all three picture volumes
+        run: |
+          make stack-rm
+          scripts/ci/wait_stack_gone.sh
+          docker volume rm moh_db-data moh_grounds-images moh_plates-images moh_photos-images
+          docker volume ls --filter name=moh_
+
+      - name: §13 Restoring for real
+        run: |
+          # The volumes are gone, so the stack comes back with an empty
+          # database; that is the state the guide's restore starts from.
+          make stack-deploy MOH_RESOLVE_IMAGE=never
+          scripts/ci/wait_healthy.sh
+
+          make backup                                           # the before picture
+          docker service scale moh_api=0 moh_worker-weather=0 \
+            moh_worker-botany=0 moh_worker-hub=0 moh_worker-plates=0
+
+          scripts/restore.sh --from "$DRILL_DUMP" --into herbology --force
+
+          # §13 Restoring the pictures, while the services are still at 0.
+          scripts/restore_volume.sh --from "$DRILL_ARCHIVE_plates" --into moh_plates-images --force
+          scripts/restore_volume.sh --from "$DRILL_ARCHIVE_grounds" --into moh_grounds-images --force
+          scripts/restore_volume.sh --from "$DRILL_ARCHIVE_photos" --into moh_photos-images --force
+
+          docker service scale moh_api=2 moh_worker-weather=1 \
+            moh_worker-botany=1 moh_worker-hub=1 moh_worker-plates=1
+          scripts/migrate.sh status
+          scripts/ci/wait_healthy.sh
+
+      - name: Everything came back
+        run: python3 scripts/drill.py verify --state "$DRILL_STATE"
+
+      - name: §12 Rotating a secret — the database password, as the guide does it
+        run: |
+          NEW=moh_db_password_$(date +%Y%m%d)
+          DB_PASSWORD=$(openssl rand -base64 39 | tr -d '\n')
+          echo "::add-mask::$DB_PASSWORD"
+          printf '%s' "$DB_PASSWORD" | docker secret create "$NEW" -
+
+          printf "ALTER ROLE herbology PASSWORD '%s';\n" "$DB_PASSWORD" \
+            | docker exec -i $(docker ps -qf name=moh_db) psql -q -U herbology -d herbology
+          unset DB_PASSWORD
+
+          echo "MOH_DB_PASSWORD_SECRET=$NEW" >> .env.deploy
+          make stack-deploy MOH_RESOLVE_IMAGE=never
+          scripts/ci/wait_healthy.sh
+
+          docker secret rm moh_db_password
+          echo "ROTATED_SECRET=$NEW" >> "$GITHUB_ENV"
+
+      - name: The rotation survives the next deploy
+        run: |
+          # The flaw this replaced: a rotation by `docker service update` was
+          # undone by the next `make stack-deploy`, which put the old name back
+          # (and here, with the old secret removed, would fail outright).
+          make stack-deploy MOH_RESOLVE_IMAGE=never
+          scripts/ci/wait_healthy.sh
+          for svc in moh_db moh_api moh_worker-weather moh_worker-botany moh_worker-hub moh_worker-plates; do
+            docker service inspect "$svc" \
+              --format '{{range .Spec.TaskTemplate.ContainerSpec.Secrets}}{{.SecretName}} {{.File.Name}}{{"\n"}}{{end}}' \
+              | grep -Eqx "$ROTATED_SECRET (/run/secrets/)?moh_db_password" \
+              || { echo "$svc does not mount $ROTATED_SECRET at /run/secrets/moh_db_password"; exit 1; }
+          done
+          echo "every service reads $ROTATED_SECRET at the same path"
+          python3 scripts/drill.py verify --state "$DRILL_STATE"
+
+      - name: What the stack was doing, if anything failed
+        if: failure()
+        run: |
+          make stack-ps || true
+          for s in $(docker service ls --format '{{.Name}}'); do
+            echo "::group::$s"; docker service logs --tail 80 "$s" 2>&1 || true; echo "::endgroup::"
+          done

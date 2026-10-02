@@ -1,0 +1,27 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.svelte-kit/
+web/build/
+web/.vite/
+
+# Local config and data
+.env
+.env.*
+!.env.example
+data/
+uploads/
+# Database dumps. scripts/backup.sh writes here by default.
+backups/
+
+# Editors and OS
+.DS_Store
+*.swp
+*.egg-info/
