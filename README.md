@@ -118,35 +118,35 @@ Also in the folder:
 Read these before installing for real:
 
 1. **There is no login yet.** Anyone who can reach the address can see and
-   change everything. The shared sign-in is being built for
-   v1.0. Even with it, keep the app on your home network or behind a VPN such
+   change everything. The shared sign-in is planned for future builds.
+   Even with it, keep the app on your home network or behind a VPN such
    as WireGuard or Tailscale, and **do not expose it to the internet.** The
    sign-in is a lock on the door, not a reason to put the door on the street.
-2. **A new plant starts with no care values in a real installation.** The
+3. **A new plant starts with no care values in a real installation.** The
    botany worker looks up cited care values, but nothing saves them to your
    database yet. In demo mode the sample plants come with theirs. This is fixed
    for v1.0.
    Until then, give each new plant a watering interval yourself (a *care rule*,
    [§3](#3-first-time-setup)). Until you do, it sits under "Nothing is
    scheduled for these" in Morning Rounds, so it isn't forgotten.
-3. **Some setup is still done outside the app.** You enter your site (its
+4. **Some setup is still done outside the app.** You enter your site (its
    location and timezone) and your household members with one database
    command. Locations and care rules go in through the API's built-in page.
    Plants, calendar feeds and everything day-to-day are done in the app.
-4. **Home Assistant and CalDAV push** were written against their documentation
+5. **Home Assistant and CalDAV push** were written against their documentation
    and tested against stand-ins, not yet against a real hub or iCloud account.
    Please report how it goes.
-5. **A plant added in the app shows its first watering as overdue.** The Add
+6. **A plant added in the app shows its first watering as overdue.** The Add
    a plant form doesn't ask for the date you got the plant, and without one
    the schedule counts from 1 January 2024. Tick that first watering once and
    the cycle restarts from that day. Or set `acquired_on` with
    `PATCH /specimens/{id}` in the API docs page. This is fixed for v1.0.
-6. **There is no theme switch on the screens yet.** The app opens in the light
+7. **There is no theme switch on the screens yet.** The app opens in the light
    parchment theme. The dark night-greenhouse theme is built and checked, but
    the control for it is only on the component gallery (`/gallery`) for now.
    The choice made there is remembered across the app. Light, Dark and Auto
    on every screen arrive for v1.0.
-7. **One machine.** The deployment has been run on a single-node swarm. A
+8. **One machine.** The deployment has been run on a single-node swarm. A
    multi-node swarm hasn't been tried.
 
 ## Getting started
